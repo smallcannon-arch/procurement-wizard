@@ -1,0 +1,2773 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>採購流程精靈 — 公立學校適用版</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1c1c2e;
+  --ink-mid: #3a3a5c;
+  --ink-light: #6b6b8d;
+  --paper: #f7f5f0;
+  --paper-dark: #ede9df;
+  --border: #d5cfc0;
+  --accent: #b5390a;
+  --accent-light: #d94f1e;
+  --gold: #9a7b2f;
+  --green: #2d7a4f;
+  --green-light: #e8f5ee;
+  --warn: #c05c00;
+  --warn-bg: #fff4e8;
+  --info: #1a5f8a;
+  --info-bg: #e8f4fb;
+  --shadow: rgba(28,28,46,0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── 頂部系統資訊列 ── */
+.system-bar {
+  background: var(--ink);
+  color: rgba(255,255,255,0.85);
+  font-size: 0.75rem;
+  padding: 7px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  letter-spacing: 0.03em;
+}
+.system-bar .version-badge {
+  background: var(--accent);
+  color: white;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+.system-bar .update-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.system-bar .update-time .dot {
+  width: 7px; height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; }
+  50% { opacity:0.4; }
+}
+.system-bar .law-refs {
+  margin-left: auto;
+  opacity: 0.65;
+  font-size: 0.68rem;
+}
+.pending-law-tag {
+  background: #f59e0b;
+  color: #1c1c2e;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.68rem;
+  margin-left: 8px;
+  animation: blink 3s ease-in-out infinite;
+}
+@keyframes blink {
+  0%,100%{opacity:1} 50%{opacity:0.6}
+}
+
+/* ── 主 Header ── */
+header {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 22px 32px 24px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.header-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.header-icon {
+  width: 48px; height: 48px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.header-text h1 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.header-text p {
+  font-size: 0.8rem;
+  opacity: 0.55;
+  margin-top: 3px;
+  letter-spacing: 0.04em;
+}
+.header-progress {
+  margin-left: auto;
+  text-align: right;
+}
+.progress-label { font-size: 0.72rem; opacity: 0.6; margin-bottom: 6px; letter-spacing: 0.05em; }
+.progress-bar { width: 160px; height: 5px; background: rgba(255,255,255,0.15); border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.5s ease; }
+
+/* ── 修法公告橫幅 ── */
+.law-alert {
+  background: linear-gradient(135deg, #78350f, #92400e);
+  color: #fef3c7;
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.law-alert .alert-icon { font-size: 1.1rem; flex-shrink: 0; }
+.law-alert a { color: #fcd34d; text-decoration: underline; }
+.law-alert-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #fef3c7;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.7;
+  padding: 2px 6px;
+}
+.law-alert-close:hover { opacity: 1; }
+
+/* ── 主內容區 ── */
+.main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+/* ── 步驟一：選擇參數 ── */
+.wizard-step { padding-top: 36px; }
+.step-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.step-num {
+  width: 28px; height: 28px;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.step-subtitle { font-size: 0.82rem; color: var(--ink-light); margin-bottom: 20px; padding-left: 38px; }
+
+/* 選項卡 */
+.option-grid {
+  display: grid;
+  gap: 10px;
+  padding-left: 38px;
+}
+.option-grid.col2 { grid-template-columns: repeat(2, 1fr); }
+.option-grid.col3 { grid-template-columns: repeat(3, 1fr); }
+.option-grid.col4 { grid-template-columns: repeat(4, 1fr); }
+
+.opt-card {
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  position: relative;
+}
+.opt-card:hover { border-color: var(--ink-mid); }
+.opt-card.selected {
+  border-color: var(--accent);
+  background: #fff6f3;
+}
+.opt-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px; right: 10px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.opt-card .opt-label {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--ink);
+  margin-bottom: 3px;
+}
+.opt-card .opt-range {
+  font-size: 0.75rem;
+  color: var(--ink-light);
+}
+.opt-card .opt-law {
+  font-size: 0.68rem;
+  color: var(--gold);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px 0;
+}
+
+/* 開始按鈕 */
+.start-btn-wrap { padding-left: 38px; margin-top: 24px; }
+.start-btn {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 14px 36px;
+  border-radius: 8px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+}
+.start-btn:hover { background: var(--accent); }
+.start-btn:disabled { opacity: 0.3; cursor: default; }
+
+/* ── 流程畫面 ── */
+#flowScreen { display: none; padding-top: 28px; }
+
+/* 回上一步 */
+.back-to-setup {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-light);
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1.5px solid var(--border);
+  background: white;
+  transition: all 0.18s;
+  margin-bottom: 18px;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.back-to-setup:hover { border-color: var(--ink); color: var(--ink); }
+
+/* 分頁導覽 */
+.phase-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.phase-tab {
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: white;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex; align-items: center; gap: 5px;
+}
+.phase-tab:hover { border-color: var(--ink); color: var(--ink); }
+.phase-tab.active { background: var(--ink); border-color: var(--ink); color: white; }
+.phase-tab.done { background: var(--green); border-color: var(--green); color: white; }
+.tab-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.6; }
+
+/* 流程區塊 */
+.phase-panel { display: none; animation: fadeUp 0.25s ease; }
+.phase-panel.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.phase-header {
+  display: flex; align-items: flex-start; gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 2px solid var(--border);
+}
+.phase-num {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--border);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.phase-hd-text h2 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.phase-hd-text p { font-size: 0.83rem; color: var(--ink-light); line-height: 1.6; }
+
+/* 注意框 */
+.notice-box {
+  border-radius: 8px;
+  padding: 13px 16px;
+  margin-bottom: 18px;
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 0.8rem;
+  line-height: 1.7;
+}
+.notice-box.warn { background: var(--warn-bg); border: 1.5px solid #f0a060; color: #7a3a00; }
+.notice-box.info { background: var(--info-bg); border: 1.5px solid #90c4e0; color: #0d3f5c; }
+.notice-box.law  { background: #f0f0ff; border: 1.5px solid #9090d0; color: #2a2a70; }
+.notice-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+/* 清單群組 */
+.group-wrap { margin-bottom: 24px; }
+.group-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* 清單項目 */
+.check-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 13px 15px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  margin-bottom: 7px;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+.check-item::before {
+  content: '';
+  position: absolute;
+  left:0; top:0; bottom:0;
+  width: 3px;
+  background: var(--border);
+  transition: background 0.18s;
+}
+.check-item:hover { border-color: var(--ink-mid); transform: translateX(2px); }
+.check-item.checked { background: var(--green-light); border-color: var(--green); }
+.check-item.checked::before { background: var(--green); }
+.check-item.warn-item { background: var(--warn-bg); border-color: #e0904a; }
+.check-item.warn-item::before { background: var(--warn); }
+.check-item.warn-item.checked { background: var(--green-light); border-color: var(--green); }
+
+.chk-box {
+  width: 21px; height: 21px;
+  border: 2px solid var(--border);
+  border-radius: 5px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+  margin-top: 1px;
+}
+.check-item.checked .chk-box { background: var(--green); border-color: var(--green); }
+.chk-mark { display: none; color: white; font-size: 12px; font-weight: 700; }
+.check-item.checked .chk-mark { display: block; }
+
+.item-body { flex: 1; }
+.item-title {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink);
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+.check-item.checked .item-title { color: var(--ink-light); text-decoration: line-through; text-decoration-color: var(--green); }
+.item-desc { font-size: 0.76rem; color: var(--ink-light); line-height: 1.6; }
+
+/* 標籤 */
+.item-tags { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: middle; }
+.tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.tag-law { background: #eef2ff; color: #3730a3; cursor: pointer; transition: all 0.15s; }
+.tag-law:hover { background: #3730a3; color: white; }
+.tag-doc { background: #fef9c3; color: #854d0e; }
+.tag-date { background: #fee2e2; color: #991b1b; }
+.tag-warn { background: #ffedd5; color: #9a3412; }
+.tag-tip { background: #f0fdf4; color: #166534; }
+
+/* ── 法條 AI 彈窗 ── */
+.law-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(28,28,46,0.5);
+  z-index: 1000;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+  backdrop-filter: blur(3px);
+}
+.law-overlay.open { display: flex; animation: overlayIn 0.2s ease; }
+@keyframes overlayIn { from{opacity:0} to{opacity:1} }
+
+.law-modal {
+  background: white;
+  border-radius: 18px 18px 0 0;
+  width: 100%;
+  max-width: 680px;
+  height: 72vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -8px 40px rgba(28,28,46,0.25);
+  animation: modalUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalUp { from{transform:translateY(40px);opacity:0} to{transform:translateY(0);opacity:1} }
+
+.law-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.law-modal-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.law-modal-title .law-badge {
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.68rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 600;
+}
+.law-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--ink-light);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+.law-modal-close:hover { background: var(--paper); color: var(--ink); }
+
+/* 對話區 */
+.law-chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.chat-msg {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  animation: msgIn 0.2s ease;
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+.chat-msg.user { flex-direction: row-reverse; }
+.chat-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.chat-msg.ai .chat-avatar { background: var(--ink); color: white; font-size: 0.7rem; font-weight: 700; }
+.chat-msg.user .chat-avatar { background: #eef2ff; color: #3730a3; }
+
+.chat-bubble {
+  max-width: 82%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: var(--ink);
+}
+.chat-msg.ai .chat-bubble {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 4px 12px 12px 12px;
+}
+.chat-msg.user .chat-bubble {
+  background: var(--ink);
+  color: white;
+  border-radius: 12px 4px 12px 12px;
+}
+.chat-bubble strong { color: var(--accent); }
+.chat-msg.user .chat-bubble strong { color: #93c5fd; }
+
+/* 打字動畫 */
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 8px 4px;
+}
+.typing-dot {
+  width: 7px; height: 7px;
+  background: var(--ink-light);
+  border-radius: 50%;
+  animation: typingBounce 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%,60%,100% { transform: translateY(0); opacity:0.4; }
+  30% { transform: translateY(-6px); opacity:1; }
+}
+
+/* 輸入區 */
+.law-chat-input-wrap {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.law-chat-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.83rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+  resize: none;
+  height: 40px;
+  line-height: 1.4;
+}
+.law-chat-input:focus { border-color: var(--ink); }
+.law-chat-send {
+  background: var(--ink);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+.law-chat-send:hover { background: var(--accent); }
+.law-chat-send:disabled { opacity: 0.4; cursor: default; }
+
+/* 簽呈範本區 */
+.template-section {
+  margin-top: 10px;
+  padding: 16px;
+  background: #f8f7f4;
+  border: 1.5px dashed var(--border);
+  border-radius: 8px;
+}
+.template-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-mid);
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.template-body {
+  font-size: 0.78rem;
+  line-height: 2;
+  color: var(--ink);
+  white-space: pre-wrap;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.template-actions { margin-top: 10px; display: flex; gap: 8px; }
+.btn-copy {
+  padding: 6px 14px;
+  background: var(--ink);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.btn-copy:hover { background: var(--accent); }
+.btn-copy.copied { background: var(--green); }
+.btn-official-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  background: #1a5f8a;
+  color: white;
+  border-radius: 5px;
+  font-size: 0.75rem;
+  text-decoration: none;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: background 0.2s;
+}
+.btn-official-link:hover { background: #0e4166; }
+
+/* ── 官方連結區塊 ── */
+.official-links-section {
+  background: #eef4fb;
+  border: 1.5px solid #90b8d8;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+.official-links-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #1a5f8a;
+  margin-bottom: 10px;
+}
+.official-links-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 導覽按鈕 */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.btn-nav {
+  padding: 11px 24px;
+  border-radius: 7px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  border: none;
+  letter-spacing: 0.03em;
+}
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--ink-light); }
+.btn-outline:hover { border-color: var(--ink); color: var(--ink); }
+.btn-primary { background: var(--ink); color: var(--paper); }
+.btn-primary:hover { background: var(--accent); }
+.btn-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+.phase-stat { font-size: 0.78rem; color: var(--ink-light); display:flex; flex-direction:column; align-items:center; gap:4px; }
+.phase-stat span { font-weight: 600; color: var(--green); }
+.warn-unfinished { font-size: 0.72rem; color: var(--warn); font-weight: 600; }
+
+/* 完成畫面 */
+.complete-screen {
+  text-align: center;
+  padding: 60px 20px;
+  display: none;
+}
+.complete-icon { font-size: 4rem; margin-bottom: 20px; }
+.complete-screen h2 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
+.complete-screen p { color: var(--ink-light); font-size: 0.88rem; line-height: 1.8; max-width: 480px; margin: 0 auto 28px; }
+.btn-reset {
+  background: var(--accent);
+  color: white;
+  padding: 13px 32px;
+  border-radius: 8px;
+  border: none;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-reset:hover { background: var(--accent-light); }
+
+/* ── 易漏點標示 ── */
+.tag-miss { background: #fde8e8; color: #9b1c1c; cursor: pointer; transition: all 0.15s; border: 1px solid #fca5a5; }
+.tag-miss:hover { background: #9b1c1c; color: white; }
+.miss-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 200;
+  background: #1c1c2e;
+  color: white;
+  font-size: 0.73rem;
+  line-height: 1.6;
+  padding: 10px 14px;
+  border-radius: 8px;
+  max-width: 280px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  white-space: normal;
+  pointer-events: none;
+}
+.miss-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px; left: 14px;
+  border: 6px solid transparent;
+  border-bottom-color: #1c1c2e;
+  border-top: none;
+}
+.tag-miss-wrap { position: relative; display: inline-block; }
+.tag-miss-wrap:hover .miss-tooltip { display: block; }
+
+/* ── 簽呈提醒區塊 ── */
+.sign-alert {
+  background: #fff8e8;
+  border: 2px solid #f59e0b;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.sign-alert-icon { font-size: 1.3rem; flex-shrink: 0; }
+.sign-alert-body { flex: 1; }
+.sign-alert-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #92400e;
+  margin-bottom: 6px;
+}
+.sign-alert-rows { display: flex; flex-direction: column; gap: 5px; }
+.sign-alert-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.78rem;
+  color: #78350f;
+  line-height: 1.5;
+}
+.sign-alert-row::before { content: '→'; color: #f59e0b; flex-shrink: 0; font-weight: 700; }
+
+/* ── 簽呈卡片（新版） ── */
+.sign-card {
+  background: #fffbf0;
+  border: 2px solid #e8a820;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.sign-card-header {
+  background: #e8a820;
+  color: #1c1c2e;
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.sign-card-body {
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media(max-width:600px){ .sign-card-body { grid-template-columns: 1fr; } }
+.sign-field { display: flex; flex-direction: column; gap: 3px; }
+.sign-field.full-width { grid-column: 1 / -1; }
+.sign-field-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #92400e;
+  letter-spacing: 0.05em;
+}
+.sign-field-value {
+  font-size: 0.82rem;
+  color: #1c1c2e;
+  line-height: 1.6;
+}
+.sign-route {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.sign-route-step {
+  background: #fff;
+  border: 1.5px solid #e8a820;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #78350f;
+}
+.sign-route-arrow { color: #e8a820; font-weight: 700; font-size: 0.9rem; }
+.sign-checklist { display: flex; flex-direction: column; gap: 5px; }
+.sign-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #1c1c2e;
+  line-height: 1.5;
+}
+.sign-check-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #1c1c2e;
+  line-height: 1.5;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.sign-check-row input[type="checkbox"] {
+  width: 15px; height: 15px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: #2d7a4f;
+  cursor: pointer;
+}
+.sign-check-row label {
+  cursor: pointer;
+  line-height: 1.5;
+  transition: color 0.15s, font-weight 0.15s;
+}
+.sign-check-row:has(input:checked) {
+  background: #2d7a4f;
+}
+.sign-check-row input[type="checkbox"]:checked + label {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* ── 監辦警示（橘色） ── */
+.monitor-alert {
+  background: #fff4e8;
+  border: 2px solid #ea580c;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.monitor-alert-header {
+  background: #ea580c;
+  color: white;
+  padding: 9px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.monitor-alert-body {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.monitor-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: #7c2d12;
+  line-height: 1.6;
+}
+.monitor-dot {
+  width: 7px; height: 7px;
+  background: #ea580c;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+/* ── 期限計算器 ── */
+.deadline-panel {
+  background: #eef9ff;
+  border: 1.5px solid #90c4e0;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+}
+.deadline-panel-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1a5f8a;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.deadline-inputs { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.deadline-input-group { display: flex; flex-direction: column; gap: 4px; }
+.deadline-input-group label { font-size: 0.72rem; color: var(--ink-light); font-weight: 500; }
+.deadline-input-group input[type=date] {
+  padding: 7px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.8rem;
+  color: var(--ink);
+  background: white;
+  outline: none;
+}
+.deadline-input-group input[type=date]:focus { border-color: var(--info); }
+.deadline-results { display: flex; flex-wrap: wrap; gap: 8px; }
+.deadline-chip {
+  background: white;
+  border: 1.5px solid #90c4e0;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  color: #0d3f5c;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.deadline-chip .chip-label { color: var(--ink-light); font-size: 0.7rem; }
+.deadline-chip.overdue { border-color: #ef4444; background: #fef2f2; color: #991b1b; }
+.deadline-chip.soon { border-color: #f59e0b; background: #fffbeb; color: #92400e; }
+
+/* ── 案件管理側邊欄 ── */
+.case-bar-btn {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--ink);
+  color: white;
+  border: none;
+  border-radius: 8px 0 0 8px;
+  padding: 12px 8px;
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  z-index: 300;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.case-bar-btn:hover { background: var(--accent); }
+.case-bar-btn .case-count {
+  background: var(--accent);
+  color: white;
+  border-radius: 10px;
+  padding: 2px 5px;
+  font-size: 0.65rem;
+  writing-mode: horizontal-tb;
+  min-width: 18px;
+  text-align: center;
+}
+
+.case-panel {
+  position: fixed;
+  right: -340px;
+  top: 0;
+  width: 340px;
+  height: 100vh;
+  background: white;
+  box-shadow: -4px 0 24px rgba(28,28,46,0.18);
+  z-index: 400;
+  transition: right 0.3s cubic-bezier(0.34,1.2,0.64,1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.case-panel.open { right: 0; }
+.case-panel-header {
+  background: var(--ink);
+  color: white;
+  padding: 18px 16px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.case-panel-header h3 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1rem;
+  font-weight: 700;
+}
+.case-panel-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.case-panel-close:hover { color: white; }
+.case-panel-body { flex: 1; overflow-y: auto; padding: 14px; }
+.case-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--ink-light);
+  font-size: 0.82rem;
+  line-height: 1.8;
+}
+.case-card {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  background: var(--paper);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.case-card:hover { border-color: var(--ink); background: white; }
+.case-card-title { font-size: 0.85rem; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+.case-card-meta { font-size: 0.72rem; color: var(--ink-light); display: flex; gap: 8px; flex-wrap: wrap; }
+.case-card-pct {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 6px;
+  display: inline-block;
+}
+.case-card-pct.low { background: #fee2e2; color: #991b1b; }
+.case-card-pct.mid { background: #fef9c3; color: #854d0e; }
+.case-card-pct.high { background: #dcfce7; color: #166534; }
+.case-card-actions { display: flex; gap: 6px; margin-top: 8px; }
+.case-btn { font-size: 0.72rem; padding: 4px 10px; border-radius: 5px; border: none; cursor: pointer; font-family: 'Noto Sans TC', sans-serif; transition: all 0.15s; }
+.case-btn-load { background: var(--ink); color: white; }
+.case-btn-load:hover { background: var(--accent); }
+.case-btn-del { background: #fee2e2; color: #991b1b; }
+.case-btn-del:hover { background: #fca5a5; }
+.case-save-row { padding: 12px 14px; border-top: 1px solid var(--border); flex-shrink: 0; }
+.case-save-row input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.82rem;
+  margin-bottom: 8px;
+  outline: none;
+}
+.case-save-row input:focus { border-color: var(--ink); }
+.case-btn-save {
+  width: 100%;
+  padding: 9px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 7px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.case-btn-save:hover { background: #1a5f3a; }
+
+@media(max-width:640px) {
+  .option-grid.col3,.option-grid.col4 { grid-template-columns: repeat(2,1fr); }
+  .option-grid.col2 { grid-template-columns: 1fr; }
+  .phase-num { font-size: 2rem; }
+  header { padding: 18px 20px; }
+  .header-progress { display: none; }
+  .system-bar { padding: 6px 16px; font-size: 0.7rem; }
+  .case-panel { width: 100%; right: -100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── 系統資訊列 ── -->
+<div class="system-bar" id="systemBar">
+  <span class="version-badge">v1.1</span>
+  <span class="update-time">
+    <span class="dot"></span>
+    法規資料更新：<strong>114年3月10日</strong>
+  </span>
+  <span>｜ 適用：公立學校（中央機關規定）</span>
+  <span class="pending-law-tag">⚠ 修法草案進行中</span>
+  <span class="law-refs">資料來源：工程會採購法規 ／ 113年12月錯誤行為態樣</span>
+</div>
+
+<!-- ── 修法預告橫幅 ── -->
+<div class="law-alert" id="lawAlert">
+  <span class="alert-icon">⚖️</span>
+  <span>
+    <strong>【修法預告】</strong>
+    工程會於114年11月11日預告《政府採購法》修正草案（共52條），重大變動包括：
+    擬取消「公開招標須3家廠商投標始得開標」限制。草案預告期已於115年1月10日截止，尚未完成立法程序，
+    <strong>現行規定仍適用</strong>。請持續關注工程會公告。
+  </span>
+  <button class="law-alert-close" onclick="document.getElementById('lawAlert').style.display='none'">✕</button>
+</div>
+
+<!-- ── Header ── -->
+<header>
+  <div class="header-inner">
+    <div class="header-icon">📋</div>
+    <div class="header-text">
+      <h1>採購流程精靈</h1>
+      <p>公立學校政府採購法適用版 · 依金額與採購性質自動產生流程</p>
+    </div>
+    <div class="header-progress">
+      <div class="progress-label" id="progressLabel">整體完成度 0%</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── 主內容 ── -->
+<div class="main">
+
+  <!-- 步驟一：參數選擇 -->
+  <div class="wizard-step" id="setupScreen">
+    <div class="step-title"><div class="step-num">1</div> 選擇採購方式</div>
+    <div class="step-subtitle">依預算金額自動對應，不確定時請先確認預算科目</div>
+    <div class="option-grid col3" id="methodGrid">
+      <div class="opt-card" data-method="small" onclick="selectMethod(this)">
+        <div class="opt-label">🧾 小額採購</div>
+        <div class="opt-range">未達 15 萬元</div>
+        <div class="opt-law">採購法第49條</div>
+      </div>
+      <div class="opt-card" data-method="quote" onclick="selectMethod(this)">
+        <div class="opt-label">📊 公開取得3家報價</div>
+        <div class="opt-range">15萬以上、未達150萬</div>
+        <div class="opt-law">採購法第49條；施行細則第22條之1</div>
+      </div>
+      <div class="opt-card" data-method="spirit" onclick="selectMethod(this)">
+        <div class="opt-label">⭐ 取最有利標精神</div>
+        <div class="opt-range">15萬以上、未達150萬（勞務為主）</div>
+        <div class="opt-law">未達公告金額採購招標辦法第2條第1項第3款</div>
+      </div>
+      <div class="opt-card" data-method="open" onclick="selectMethod(this)">
+        <div class="opt-label">📢 公開招標</div>
+        <div class="opt-range">150 萬元以上</div>
+        <div class="opt-law">採購法第19條；等標期≥14日（財物勞務）</div>
+      </div>
+      <div class="opt-card" data-method="limited" onclick="selectMethod(this)">
+        <div class="opt-label">🔒 限制性招標（含議價）</div>
+        <div class="opt-range">符合採購法第22條第1項各款</div>
+        <div class="opt-law">採購法第22條第1項各款</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="step-title"><div class="step-num">2</div> 選擇採購性質</div>
+    <div class="step-subtitle">兼有多種性質時，依預算金額比率最高者歸屬（採購法第7條）</div>
+    <div class="option-grid col3" id="typeGrid">
+      <div class="opt-card" data-type="goods" onclick="selectType(this)">
+        <div class="opt-label">📦 財物</div>
+        <div class="opt-range">設備、物品、材料買受</div>
+      </div>
+      <div class="opt-card" data-type="service" onclick="selectType(this)">
+        <div class="opt-label">🛠 勞務</div>
+        <div class="opt-range">委任、顧問、清潔、保全等</div>
+      </div>
+      <div class="opt-card" data-type="work" onclick="selectType(this)">
+        <div class="opt-label">🏗 工程</div>
+        <div class="opt-range">新建、修繕、改建、拆除</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="step-title"><div class="step-num">3</div> 填入學校名稱</div>
+    <div class="step-subtitle">將顯示於簽呈範本中，可隨時修改</div>
+    <div style="padding-left:38px; margin-top:10px;">
+      <input type="text" id="schoolName" placeholder="例：○○縣市○○國民小學" style="
+        width:320px; max-width:100%;
+        padding: 10px 14px;
+        border: 1.5px solid var(--border);
+        border-radius: 8px;
+        font-family: 'Noto Sans TC', sans-serif;
+        font-size: 0.88rem;
+        color: var(--ink);
+        background: white;
+        outline: none;
+        transition: border-color 0.2s;
+      " oninput="updateSchoolName()" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'">
+    </div>
+
+    <div class="start-btn-wrap" style="margin-top:28px;">
+      <button class="start-btn" id="startBtn" onclick="startFlow()" disabled>產生採購流程 →</button>
+      <div style="font-size:0.75rem; color:var(--ink-light); margin-top:8px; padding-left:0;">請先完成步驟 1 與步驟 2</div>
+    </div>
+  </div>
+
+  <!-- 流程畫面 -->
+  <div id="flowScreen">
+    <button class="back-to-setup" onclick="backToSetup()">← 重新選擇採購方式</button>
+    <div class="phase-nav" id="phaseNav"></div>
+    <div id="phaseContainer"></div>
+  </div>
+
+  <!-- 完成畫面 -->
+  <div class="complete-screen" id="completeScreen">
+    <div class="complete-icon">✅</div>
+    <h2>採購案件完成結案</h2>
+    <p>所有程序已確認完成。文件請依規定保存至少 5 年備查。<br>如需辦理下一件採購，請點擊重新開始。</p>
+    <button class="btn-reset" onclick="resetAll()">重新開始新採購案</button>
+  </div>
+
+</div>
+
+<!-- ── 案件管理側邊欄 ── -->
+<button class="case-bar-btn" id="caseBarBtn" onclick="toggleCasePanel()" title="案件管理">
+  <span>📁</span>
+  <span>案件管理</span>
+  <span class="case-count" id="caseBadge">0</span>
+</button>
+
+<div class="case-panel" id="casePanel">
+  <div class="case-panel-header">
+    <h3>📁 採購案件管理</h3>
+    <button class="case-panel-close" onclick="toggleCasePanel()">✕</button>
+  </div>
+  <div class="case-panel-body" id="casePanelBody">
+    <div class="case-empty">尚無儲存的案件<br>在流程中填入案件名稱後<br>點擊「儲存進度」即可保存</div>
+  </div>
+  <div class="case-save-row" id="caseSaveRow" style="display:none">
+    <input type="text" id="caseNameInput" placeholder="輸入案件名稱，例：114年冷氣採購" maxlength="30">
+    <button class="case-btn-save" onclick="saveCase()">💾 儲存目前進度</button>
+  </div>
+</div>
+
+<!-- ── 法條彈窗 ── -->
+<div class="law-overlay" id="lawOverlay" onclick="closeLawModal(event)">
+  <div class="law-modal" id="lawModal">
+    <div class="law-modal-header">
+      <div class="law-modal-title">
+        <span>⚖️</span>
+        <span id="lawModalTitle">採購法條文助理</span>
+        <span class="law-badge">AI 即時查詢</span>
+      </div>
+      <button class="law-modal-close" onclick="document.getElementById('lawOverlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="law-chat-area" id="lawChatArea"></div>
+    <div class="law-chat-input-wrap">
+      <input class="law-chat-input" id="lawChatInput" placeholder="繼續追問，例如：這條違反了會怎樣？" onkeydown="if(event.key==='Enter')sendLawChat()">
+      <button class="law-chat-send" id="lawChatSend" onclick="sendLawChat()">↑</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 法條資料庫 ──
+const LAW_DB = {
+  'law_49': {
+    title: '政府採購法第49條', badge: '採購法',
+    article: '第 49 條（小額採購及未達公告金額之採購）',
+    text: `未達公告金額之採購，其金額逾公告金額十分之一者，除第二十二條第一項各款情形外，仍應公開取得三家以上廠商之書面報價或企劃書。
+
+小額採購之金額，在中央由主管機關定之；在地方由直轄市或縣（市）政府定之。但均不得逾公告金額十分之一。地方未定者，比照中央規定辦理。
+
+【現行金額】
+・公告金額：150萬元（112年1月1日起適用）
+・中央機關小額採購上限：15萬元（公告金額十分之一）`,
+    source: '資料來源：政府採購法第49條 ／ 工程會111年12月23日工程企字第1110100798號令'
+  },
+  'law_19': {
+    title: '政府採購法第19條', badge: '採購法',
+    article: '第 19 條（公開招標）',
+    text: `機關辦理公告金額以上之採購，應依本法公開招標。
+
+【重點說明】
+・財物及勞務採購等標期不得少於14日曆天
+・工程採購等標期不得少於28日曆天
+・須於政府電子採購網（eTender）刊登招標公告`,
+    source: '資料來源：政府採購法第19條、第28條'
+  },
+  'law_22': {
+    title: '政府採購法第22條', badge: '採購法',
+    article: '第 22 條第1項（限制性招標之適用情形）',
+    text: `機關辦理公告金額以上之採購，符合下列情形之一者，得採限制性招標：
+一、以公開招標、選擇性招標辦理結果，無廠商投標或無合格標，且以原定招標內容及條件未經重大改變者。
+二、屬專屬權利、獨家製造或供應、藝術品、秘密諮詢，無其他合適之替代標的者。
+三、遇有不可預見之緊急事故，致無法以公開或選擇性招標程序適時辦理，且確有必要者。
+四、原有採購之後續維修、零配件供應、更換或擴充，因相容或互通性之需要，必須向原供應廠商採購者。
+五、屬原型或首次製造、供應之標的，以研究發展、實驗或開發性質辦理者。
+六、在原招標目的範圍內，因未能預見之情形，必須追加契約以外之工程……且未逾原主契約金額百分之五十者。
+七、原有採購之後續擴充，且已於原招標公告及招標文件敘明擴充之期間、金額或數量者。
+（以下尚有第八款至第十六款，請見全文）`,
+    source: '資料來源：政府採購法第22條第1項'
+  },
+  'law_7': {
+    title: '政府採購法第7條', badge: '採購法',
+    article: '第 7 條（採購性質定義）',
+    text: `本法所稱工程，指在地面上下新建、增建、改建、修建、拆除構造物與其所屬設備及改變自然環境之行為，包括建築、土木、水利、環境、交通、機械、電氣、化工及其他經主管機關認定之工程。
+
+本法所稱財物，指各種物品（生鮮農漁產品除外）、材料、設備、機具與其他動產、不動產、權利及其他經主管機關認定之財物。
+
+本法所稱勞務，指專業服務、技術服務、資訊服務、研究發展、營運管理、維修、訓練、勞力及其他經主管機關認定之勞務。
+
+採購兼有工程、財物、勞務二種以上性質，難以認定其歸屬者，<strong>按其性質所占預算金額比率最高者歸屬之</strong>。`,
+    source: '資料來源：政府採購法第7條'
+  },
+  'law_48': {
+    title: '政府採購法第48條', badge: '採購法',
+    article: '第 48 條（開標家數）',
+    text: `機關依本法規定辦理招標，除有下列情形之一不予開標決標外，<strong>有三家以上合格廠商投標，即應依招標文件所定時間開標決標</strong>：
+一、變更或補充招標文件內容者。
+二、發現有足以影響採購公正之違法或不當行為者。
+三、依第八十二條規定暫緩開標者。
+……（其他情形略）
+
+【⚠ 修法動態】
+工程會114年11月修正草案擬取消「3家」門檻限制，
+草案預告期已截止，但尚未完成立法程序。
+現行規定「須3家以上」仍然有效。`,
+    source: '資料來源：政府採購法第48條 ／ 工程會114年11月修正草案（預告中）'
+  },
+  'law_6': {
+    title: '政府採購法第6條', badge: '採購法',
+    article: '第 6 條（公平合理原則）',
+    text: `機關辦理採購，應以維護公共利益及公平合理為原則，對廠商不得為無正當理由之差別待遇。
+
+辦理採購人員於不違反本法規定之範圍內，得基於公共利益、採購效益或專業判斷之考量，為適當之採購決定。
+
+【實務意涵】
+限制性招標屬例外程序，不得以「便利」或「熟識廠商」作為使用理由，
+否則可能構成圖利或違反採購公平原則。`,
+    source: '資料來源：政府採購法第6條'
+  },
+  'law_26': {
+    title: '政府採購法第26條', badge: '採購法',
+    article: '第 26 條（禁止不當限制競爭）',
+    text: `機關辦理採購，不得於招標文件中規定或暗示投標廠商不得轉包，或要求以特定廠商之產品或服務作為規格基準。
+
+機關所為採購規格，不得不當限制競爭；其有需要者，得附加「或同等品」之選項。
+
+【常見錯誤態樣（工程會錯誤行為態樣第1序號）】
+・以特定廠牌型號作為規格，未允許同等品競標
+・非屬必要卻限不同組件須由相同廠牌組成
+・以ISO9000驗證或特定正字標記作為產品規範`,
+    source: '資料來源：政府採購法第26條 ／ 113年12月錯誤行為態樣'
+  },
+  'law_52': {
+    title: '政府採購法第52條', badge: '採購法',
+    article: '第 52 條（決標原則）',
+    text: `機關辦理採購之決標，應依下列原則之一辦理，並應載明於招標文件中：
+一、訂有底價之採購，以合於招標文件規定，且在底價以內之最低標為得標廠商。
+二、未訂底價之採購，以合於招標文件規定，標價合理，且在預算數額以內之最低標為得標廠商。
+三、以合於招標文件規定之最有利標為得標廠商。
+四、採用複數決標之方式。
+
+【底價洽減規定（採購法第53條）】
+・最低標廠商超過底價但在底價1.03倍以內，得洽其減價一次。
+・若仍超底價，得洽次低標依序辦理，或重新公開招標。`,
+    source: '資料來源：政府採購法第52條、第53條'
+  },
+  'law_65': {
+    title: '政府採購法第65條', badge: '採購法',
+    article: '第 65 條（禁止轉包）',
+    text: `得標廠商應自行履行工程、勞務契約，不得轉包。
+
+前項所稱轉包，指將原契約中應自行履行之全部或其主要部分，由其他廠商代為履行。
+
+廠商違反前二項規定轉包其他廠商時，機關得解除契約、終止契約或沒收保證金，並得要求損害賠償。
+
+【113年新增錯誤態樣】
+・履約階段由未得標廠商代為履行契約之全部或主要部分
+・對於轉包行為視若無睹`,
+    source: '資料來源：政府採購法第65條 ／ 113年12月錯誤行為態樣'
+  },
+  'law_31': {
+    title: '政府採購法第31條', badge: '採購法',
+    article: '第 31 條（押標金之退還）',
+    text: `機關對於廠商所繳納之押標金，應於決標後無息退還未得標廠商。廢標時，亦同。
+
+押標金之發還期限：
+・決標後：應於決標後7日內退還未得標廠商
+・廢標後：應於廢標後7日內退還所有廠商
+
+【注意事項】
+押標金不予退還的情形（採購法第31條第2項）：
+・以虛偽不實之文件投標
+・借用他人名義或證件投標
+・得標後拒絕簽約
+・得標後無法履約`,
+    source: '資料來源：政府採購法第31條'
+  },
+  'law_63': {
+    title: '政府採購法第63條', badge: '採購法',
+    article: '第 63 條（標準契約範本）',
+    text: `各類採購契約以採用主管機關訂定之範本為原則，並得視個別採購特性及實際需要增減之，其增減不得牴觸與本法或其他法律規定。
+
+【工程會提醒】
+未使用工程會標準契約範本，導致契約條款錯漏，為常見採購錯誤態樣之一。
+範本下載：工程會政府電子採購網 → 招標相關文件及表格`,
+    source: '資料來源：政府採購法第63條 ／ 113年12月錯誤行為態樣'
+  },
+  'law_error': {
+    title: '採購錯誤行為態樣', badge: '工程會令',
+    article: '113年12月5日 最新修正版（工程企字第1130100044號）',
+    text: `本次修正重點（113年12月5日發布）：
+
+一、各階段前增訂「作業指引」，正向引導機關適法辦理。
+
+二、序號一（六）新增：
+「辦理採購案時，已知後續有類案採購且有預算，並無得分別辦理之法令依據，而違法分批辦理」
+→ 化整為零分批採購以規避法規，屬明確違法行為。
+
+三、履約管理新增違法態樣：
+・違反目的事業法規（如電業法）經營業務
+・未依契約繳交原廠製造證明或檢驗報告
+・繳交契約禁止之大陸地區廠牌貨品
+・出具偽變造進口報單或原廠證明文件
+
+四、圍標警示新增（序號十二）：
+・不同廠商押標金由同一廠商員工領回
+・退還未得標廠商押標金郵件，收件人蓋得標廠商章
+・廠商投標人員勞保投保單位為其他投標廠商
+・施工計畫書與未得標廠商文件內容格式相同`,
+    source: '資料來源：行政院公共工程委員會113年12月5日工程企字第1130100044號函'
+  },
+  'law_細則6': {
+    title: '政府採購法施行細則第6條', badge: '施行細則',
+    article: '第 6 條（採購金額之計算）',
+    text: `機關辦理採購，依採購金額於招標前認定之；其採購金額之計算方式如下：
+一、採分批辦理採購者，<strong>依全部批數之預算總額認定之</strong>。
+二、依複數決標者，依全部項目或數量之預算總額認定之。
+三、招標文件含有選購或後續擴充項目者，應將預估選購或擴充項目所需金額計入。
+四、採購項目之預算案尚未經立法程序者，應將預估需用金額計入。
+五、採單價決標者，依預估採購所需金額認定之。
+
+【實務重點】
+不得以「分批」方式將原應辦理公開招標之採購，
+拆分成多筆小額採購，以規避公告金額限制。`,
+    source: '資料來源：政府採購法施行細則第6條'
+  },
+};
+
+// 依法條關鍵字對應資料庫 key
+const LAW_TAG_MAP = {
+  '採購法第49條': 'law_49',
+  '採購法第19條': 'law_19',
+  '採購法第22條': 'law_22',
+  '採購法第7條': 'law_7',
+  '採購法第48條': 'law_48',
+  '採購法第6條': 'law_6',
+  '採購法第26條': 'law_26',
+  '採購法第52條': 'law_52',
+  '採購法第65條': 'law_65',
+  '採購法第31條': 'law_31',
+  '採購法第63條': 'law_63',
+  '錯誤行為態樣': 'law_error',
+  '施行細則第6條': 'law_細則6',
+};
+
+// ── AI 法條對話 ──
+let lawChatHistory = [];
+let lawChatContext = '';
+
+function openLawModal(itemTitle, itemDesc) {
+  lawChatHistory = [];
+  lawChatContext = `使用者正在使用「公立學校政府採購流程精靈」工具，點擊了一個採購步驟的法規標籤。
+採購方式：${selectedMethod || '未選擇'}
+採購性質：${selectedType || '未選擇'}
+步驟標題：${itemTitle}
+步驟說明：${itemDesc}`;
+
+  document.getElementById('lawModalTitle').textContent = '採購法條文助理';
+  document.getElementById('lawChatArea').innerHTML = '';
+  document.getElementById('lawOverlay').classList.add('open');
+  document.getElementById('lawChatInput').value = '';
+
+  // 自動送出第一個問題
+  const autoQ = `請說明「${itemTitle}」這個步驟的相關法規依據，包括適用條文、重點規定與學校實務上要注意的事項。請用繁體中文回答，條文引用要精確。`;
+  askAI(autoQ, true);
+}
+
+function sendLawChat() {
+  const input = document.getElementById('lawChatInput');
+  const q = input.value.trim();
+  if (!q) return;
+  input.value = '';
+  askAI(q, false);
+}
+
+function addChatMsg(role, text) {
+  const area = document.getElementById('lawChatArea');
+  const isAI = role === 'ai';
+  const div = document.createElement('div');
+  div.className = `chat-msg ${isAI ? 'ai' : 'user'}`;
+  div.innerHTML = `
+    <div class="chat-avatar">${isAI ? 'AI' : '我'}</div>
+    <div class="chat-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')}</div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const area = document.getElementById('lawChatArea');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ai';
+  div.id = 'typingMsg';
+  div.innerHTML = `
+    <div class="chat-avatar">AI</div>
+    <div class="chat-bubble">
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+  `;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+async function askAI(question, isAuto) {
+  if (!isAuto) addChatMsg('user', question);
+  addTypingIndicator();
+  document.getElementById('lawChatSend').disabled = true;
+  document.getElementById('lawChatInput').disabled = true;
+
+  lawChatHistory.push({ role: 'user', content: question });
+
+  const systemPrompt = `你是台灣政府採購法的專業顧問，專門協助公立學校行政人員（總務主任）理解採購法規。
+
+背景資訊：
+${lawChatContext}
+
+回答規則：
+1. 以繁體中文回答，語氣專業但平易近人
+2. 引用條文時格式為「採購法第XX條」或「施行細則第XX條」
+3. 說明現行金額級距（112年起）：小額15萬以下、公告金額150萬、查核金額財物工程5000萬、勞務1000萬
+4. 如有113年12月最新錯誤行為態樣相關，主動提示
+5. 如有修法草案（114年預告中）相關，提醒尚未通過
+6. 回答長度適中，重點用**粗體**標示
+7. 不確定的內容直說不確定，建議查工程會官網確認`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: lawChatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || '抱歉，查詢失敗，請再試一次。';
+
+    document.getElementById('typingMsg')?.remove();
+    addChatMsg('ai', reply);
+    lawChatHistory.push({ role: 'assistant', content: reply });
+  } catch (e) {
+    document.getElementById('typingMsg')?.remove();
+    addChatMsg('ai', '⚠️ 連線異常，請稍後再試。');
+  }
+
+  document.getElementById('lawChatSend').disabled = false;
+  document.getElementById('lawChatInput').disabled = false;
+  document.getElementById('lawChatInput').focus();
+}
+
+function closeLawModal(e) {
+  if (e.target === document.getElementById('lawOverlay')) {
+    document.getElementById('lawOverlay').classList.remove('open');
+  }
+}
+
+// ESC 關閉
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('lawOverlay').classList.remove('open');
+});
+
+function backToSetup() {
+  document.getElementById('flowScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function findLawKey(text) {
+  for (const [keyword, key] of Object.entries(LAW_TAG_MAP)) {
+    if (text.includes(keyword)) return key;
+  }
+  if (text.includes('49條') || text.includes('3家報價') || text.includes('小額')) return 'law_49';
+  if (text.includes('19條') || text.includes('等標期')) return 'law_19';
+  if (text.includes('22條') || text.includes('限制性招標')) return 'law_22';
+  if (text.includes('48條') || text.includes('三家') || (text.includes('3家') && text.includes('開標'))) return 'law_48';
+  if (text.includes('26條') || text.includes('品牌') || text.includes('同等品')) return 'law_26';
+  if (text.includes('52條') || (text.includes('底價') && text.includes('決標'))) return 'law_52';
+  if (text.includes('65條') || text.includes('轉包')) return 'law_65';
+  if (text.includes('31條') || text.includes('押標金')) return 'law_31';
+  if (text.includes('63條') || text.includes('範本')) return 'law_63';
+  if (text.includes('分批') || text.includes('化整為零')) return 'law_細則6';
+  if (text.includes('錯誤行為') || text.includes('圍標')) return 'law_error';
+  return 'law_49';
+}
+
+let selectedMethod = null;
+let selectedType = null;
+let selectedAward = null;  // 決標方式：lowest / spirit / quasi / full
+let schoolName = '';
+let currentPhase = 0;
+let checked = {};
+let currentPhases = [];
+
+function selectMethod(el) {
+  document.querySelectorAll('#methodGrid .opt-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedMethod = el.dataset.method;
+  // 公開招標才顯示決標方式
+  const awardSection = document.getElementById('awardSection');
+  if (awardSection) awardSection.style.display = selectedMethod === 'open' ? 'block' : 'none';
+  if (selectedMethod !== 'open') selectedAward = null;
+  checkReady();
+}
+function selectType(el) {
+  document.querySelectorAll('#typeGrid .opt-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedType = el.dataset.type;
+  checkReady();
+}
+function selectAward(el) {
+  document.querySelectorAll('#awardGrid .opt-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAward = el.dataset.award;
+  checkReady();
+}
+function updateSchoolName() {
+  schoolName = document.getElementById('schoolName').value.trim();
+}
+function checkReady() {
+  const ready = selectedMethod && selectedType;
+  document.getElementById('startBtn').disabled = !ready;
+}
+
+// ── 流程資料產生 ──
+function getPhases() {
+  const s = schoolName || '○○國民小學';
+  const m = selectedMethod;
+  const t = selectedType;
+  const yd = new Date().getFullYear()-1911; // 民國年
+
+  // 共用工具函數
+  const item = (title, desc, tags=[], warn=false, miss=null, sign=null) => ({title, desc, tags, warn, miss, sign});
+
+  // ── 小額採購 ──
+  if (m === 'small') {
+    return [
+      {
+        id:'p1', title:'採購前準備', desc:'小額採購程序相對簡便，但仍須留存紀錄備查。',
+        notices:[{type:'info', text:'小額採購（未達15萬元）得不訂底價，不需上政府電子採購網公告。但「意圖規避」而化整為零分批採購屬違法行為，請務必確認總金額。（採購法第49條）'}],
+        signCard:{
+          title:'採購需求簽呈',
+          timing:'詢價前，取得授權才能進行後續作業',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['採購規格說明（品名、數量、規格）','預算科目及可用餘額確認單（會計簽章）'],
+          notes:['小額採購校長核定即可，不需報上級機關','底價可不訂，但若訂了須密封保存']
+        },
+        groups:[
+          { label:'需求確認', items:[
+            item('確認採購金額未達15萬元（含稅）','計算方式含分批總額；若後續有類案採購且有預算，應合計認定。',['law','warn'],true,'含稅金額、後續類案合計常被忽略，導致應公開招標卻用小額辦理'),
+            item('確認無意圖規避分批採購情形','明知有後續類案採購，仍分批辦理以規避公告金額，屬違法行為（113年錯誤行為態樣增列）。',['law','warn'],true,'化整為零是最常見的採購違法態樣，審計查核必抓'),
+            item('向會計確認預算科目及可用餘額','確認科目正確、餘額足夠，避免核銷時被退件。',['doc'],false,'預算科目填錯是核銷被退件最常見原因'),
+          ]},
+          { label:'內部簽核', items:[
+            item('簽陳採購計畫，簽請校長核定','含採購目的、標的、預算、辦理方式，附規格說明。',['doc'],true,'很多人直接詢價，忘了先上簽呈取得授權'),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=9807&lang=1',label:'工程會｜招標相關文件及表格'}]
+      },
+      {
+        id:'p2', title:'詢價與比價', desc:'小額採購建議取得2~3家報價，留存紀錄備查核用。',
+        notices:[{type:'info', text:'小額採購法規上未強制要求3家報價，但為確保合理價格並備查，建議至少取得2家以上書面報價。'}],
+        groups:[
+          { label:'詢價', items:[
+            item('訂定採購規格（功能性為主，避免指定品牌）','若有正當理由需指定品牌，應在採購紀錄中說明理由。',['law','warn'],true,'指定特定品牌而無正當理由，是審計查核重點'),
+            item('向2~3家廠商詢價，取得書面報價單','留存廠商名稱、報價金額、日期，請廠商蓋章或簽名。',['doc'],true,'只有口頭詢價、沒有書面紀錄，驗收時容易有爭議'),
+            item('確認廠商無停權紀錄','至政府電子採購網查詢廠商停權狀態。',['law']),
+          ]},
+          { label:'決定廠商', items:[
+            item('選定廠商（原則以最低合理報價為準）','若非選最低價，應記錄選擇理由（如：品質、交期等）。',['doc']),
+            item('填寫採購紀錄單（含比價結果）','記錄詢價廠商清單、各廠商報價金額、決定廠商及理由。',['doc'],true,'採購紀錄單常被忘記填，被查核時無法說明選商依據'),
+          ]},
+        ],
+      },
+      {
+        id:'p3', title:'訂購與驗收', desc:'',
+        notices:[{type:'warn', text:'驗收紀錄記載過於簡略是114年稽核最常見缺失之一，務必逐項記載驗收情形，不可僅寫「符合規定」。'}],
+        groups:[
+          { label:'訂購', items:[
+            item('以書面方式訂購（訂購單或電子郵件）','載明品名、規格、數量、單價、交貨期及地點。',['doc'],true,'口頭訂購容易產生規格爭議，務必留存書面紀錄'),
+          ]},
+          { label:'驗收', items:[
+            item('依規格逐項驗收，填寫驗收紀錄','數量清點、外觀、功能逐項記載，不可僅寫「核對符合規定」。',['doc'],true,'驗收紀錄過於簡略是114年稽核首要缺失，務必逐項記載'),
+            item('驗收人員簽名（主驗人、廠商）','主驗人通常為承辦人或授權之主任；廠商代表須到場。',['doc']),
+            item('不合格品項：要求限期改善後重驗','記錄不合格項目、要求改善期限及重驗結果。',['warn'],true),
+          ]},
+          { label:'核銷', items:[
+            item('取得統一發票（抬頭為學校全銜）','品名須與採購標的一致；含稅金額須與採購金額相符。',['doc']),
+            item('彙整核銷文件送會計','採購紀錄單、訂購單、驗收紀錄、發票，依序裝訂。',['doc'],true,'核銷文件順序或缺件是最常被退件的原因'),
+            item('採購文件歸檔保存（至少5年）','',['doc']),
+            item('固定資產登錄（單價1萬元以上）','辦理財產登錄並貼財產標籤。',['doc'],true,'設備採購常忘記財產登錄'),
+          ]},
+        ],
+      },
+    ];
+  }
+
+  // ── 取最有利標精神（未達公告金額採購招標辦法第2條第1項第3款）──
+  if (m === 'spirit') {
+    return [
+      {
+        id:'p1', title:'採購前準備', desc:'取最有利標精神適用於15萬以上、未達150萬的勞務採購（如午餐、校外教學、社團委託），不需成立評選委員會，由機關人員自行評審。',
+        notices:[
+          {type:'law', text:'法規依據：中央機關未達公告金額採購招標辦法第2條第1項第3款。公開取得3家以上廠商書面報價及企劃書，取最有利標之精神，擇符合需要者議價、依序議價或比價。'},
+          {type:'info', text:'與「公開3家報價」的差異：本方式要求廠商提交「企劃書」（不只是報價），並依評審項目及配分權重做綜合評審，不是單純比價格高低。'},
+          {type:'warn', text:'本方式不需報上級機關核准，不需成立採購評選委員會，由機關人員自行評審即可——但評審項目、配分及權重必須事先載明於招標文件中，不可事後才決定。'},
+          {type:'warn', text:'【監辦規定】本方式金額逾15萬元，依《政府採購法》第13條第2項授權各地方政府訂定之未達公告金額採購監辦辦法（如：新竹市未達公告金額採購監辦辦法），逾公告金額十分之一（15萬元）之採購，開標、議價、決標及驗收時，均須通知主(會)計單位派員監辦。若本校未設政風單位，應於採購計畫簽呈中敘明「本校未設政風單位，擬請校長核准免由政風派員監辦」，會計主任監辦即可（機關主會計及有關單位會同監辦採購辦法第5條第1款）。'},
+        ],
+        signCard:{
+          title:'採購計畫簽呈（取最有利標精神）',
+          timing:'公告前，取得授權並確認評審項目',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['採購規格說明書（含評審項目、配分及權重）','預算科目及可用餘額（會計確認）','擬採取最有利標精神之說明'],
+          notes:['本方式校長核定即可，不需報上級機關（中央機關未達公告金額採購招標辦法第2條）','評審項目、配分及權重須於招標文件中載明，不可事後更改','建議在簽呈中載明：「如公告結果未能取得3家，擬改採限制性招標」——此備案建議於開標前取得校長簽准。若未事先備案，開標當日不足3家將無法當場改採，必須另行上簽取得核准後才能續辦，將嚴重延誤採購時效（最有利標作業手冊貳、三、（五））']
+        },
+        groups:[
+          { label:'需求確認', items:[
+            item('確認採購屬勞務性質（如午餐、校外教學、社團委託）','取最有利標精神最適合勞務採購，強調整體服務品質而非單純比價格。',['law'],true,'財物採購通常不適合此方式，請確認採購性質'),
+            item('確認本校政風監辦方式','本方式逾15萬元須通知主(會)計監辦。若本校未設政風單位，建議每學年度初上一份「通案簽呈」，請校長核准本年度所有採購案因無政風編制免派員監辦——通案核准後，個別採購簽呈即不需重複敘明，可大幅降低行政負擔。',['doc','law'],false,''),
+            item('確認金額在15萬以上、未達150萬','計算方式含分批總額；若達150萬應改採公開招標。',['law'],true,'金額認定含後續擴充、分批總額'),
+            item('向會計確認預算科目及可用餘額','',['doc']),
+          ]},
+          { label:'訂定評審項目', items:[
+            item('訂定評審項目、配分及權重','例如：服務計畫60分、價格20分、廠商資歷20分。評審項目須與採購目的有關、明確合理可行。',['doc'],true,'評審項目未載明於招標文件是最常見的違法態樣'),
+            item('確認價格納入評審（建議占20%以上）','非固定費用時，價格應為評審項目之一，建議占20%-50%。',['law'],true,'完全不看價格、只看企劃書品質，容易被質疑'),
+            item('訂定合格分數門檻（建議如平均70分）','未達合格分數者不得列為符合需要者。',['doc']),
+          ]},
+          { label:'簽核', items:[
+            item('簽陳採購計畫，簽請校長核定','含採購目的、標的、預算、評審項目及配分、辦理方式，會計主任會辦。',['doc'],true,'未先取得授權即公告，是最常見的程序瑕疵'),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=2922&lang=1',label:'工程會｜最有利標簽辦文件範例'},{url:'https://www.pcc.gov.tw/content/list?eid=2921&lang=1',label:'勞務類招標文件範例'}],
+      },
+      {
+        id:'p2', title:'公告與收件', desc:'公開取得廠商書面報價及企劃書，等標期依規定不得少於5日。',
+        notices:[
+          {type:'law', text:'依招標期限標準第5條，取最有利標精神之等標期不得少於5日；公告應上政府電子採購網（eTender），並得刊登採購公報。'},
+          {type:'warn', text:'起算日規定：以機關傳送採購公告至eTender之次一上班日為公告日並起算等標期。'},
+        ],
+        groups:[
+          { label:'公告作業', items:[
+            item('於eTender刊登公告','載明採購標的、規格、評審項目及配分權重、截止收件日期。',['doc','date'],true,'評審項目及配分未載明於公告，事後不可更改'),
+            item('等標期不得少於5日曆天','視案件性質合理訂定，勞務採購建議7-14天讓廠商有充裕時間準備企劃書。',['law','date'],true,'等標期不足是常見缺失，5天是最低下限'),
+          ]},
+          { label:'收件', items:[
+            item('收取廠商書面報價及企劃書（目標3家以上）','同時取得報價單與企劃書；留存廠商名稱、統編、報價、日期。',['doc'],true,'只收到報價單但未收企劃書，無從辦理評審'),
+            item('確認廠商無停權紀錄','至eTender查詢廠商停權狀態。',['law']),
+          ]},
+          { label:'不足3家時的處置', items:[
+            item('不足3家時：選擇(1)重新公告 或 (2)改採限制性招標','依中央機關未達公告金額採購招標辦法第3條，可簽請校長核准後改採限制性招標。改採後不需重新上網公告，可直接當場與原投標廠商進行比價或議價，但底價仍須於比/議價前核定密封。若已於E-1備案簽呈中事先取得核准，當場即可改採；若未事先備案，須另行上簽取得校長核准後才能續辦，將延誤採購時效。',['law'],true,'已事先備案者可當場改採；未備案者須另行簽核，流程中斷'),
+          ]},
+        ],
+      },
+      {
+        id:'p3', title:'評審作業', desc:'由機關人員自行組成評審小組，依評審項目對廠商企劃書進行評分，不需成立採購評選委員會。',
+        notices:[
+          {type:'info', text:'取最有利標精神免成立採購評選委員會，由機關人員自行評審；評審程序、標準、評審小組組成及分工，參考最有利標精神辦理。'},
+          {type:'law', text:'【監辦規定】依最有利標作業手冊肆、五、(十八)，採購評選委員會之評選過程不適用監辦規定。本方式雖為機關人員自行評審，同樣無須通知會計主任出席評審會議，會計主任的監辦職責在後續開標（議價）及驗收時履行。'},
+          {type:'warn', text:'評審過程應保密，不得將廠商資料、優缺點互相透露；評審結果簽報校長核定後，才能通知廠商。'},
+        ],
+        groups:[
+          { label:'組成評審小組', items:[
+            item('指定評審小組成員（建議3人以上）','由承辦人、主任、校長或其他適當人員組成。本方式免成立正式採購評選委員會，但評審小組組成及分工仍須於簽呈中載明；如案件涉及專業性（如午餐營養、校外教學安全），建議納入具相關知識之人員（最有利標作業手冊貳、三、第六點）。',['doc'],true,'評審小組人數及成員應於簽呈中載明'),
+            item('評審前確認委員無利益迴避問題','小組成員不得與投標廠商有利益關係（採購法第15條）。',['law']),
+          ]},
+          { label:'評審', items:[
+            item('依評審項目及配分對每家廠商評分','逐項評分，不得以某一廠商表現或各廠商平均值作為比較基準。價格評分應考量「該價格相對於廠商所提供品質的合理性」，而非僅比較廠商間報價高低——此為最有利標作業手冊明確規定之錯誤態樣（伍、八、（七））。',['doc','warn'],true,'只比較價格高低而不考量品質合理性，是手冊明列的錯誤態樣'),
+            item('填寫評分表並簽名','每位評審人員均應填寫評分表、逐項載明評分並親自簽名。',['doc'],true,'評分表空白或僅由一人填寫，是常見缺失'),
+            item('彙整評分結果，製作評審總表','記錄各廠商各項目得分、總分及名次。',['doc']),
+            item('評審結果如有明顯差異，召開討論並記錄','若有委員對同一廠商給出極端評分（如：有人給最高分、有人給不及格），召集人應提交評審小組議決或辦理複評；不可逕以「去頭去尾（刪最高/最低分）」方式計分——此為手冊明列之錯誤態樣（伍、八、（九））。討論結果及理由須列入會議紀錄。',['warn'],true,'有明顯差異卻未處理、或逕採去頭去尾計分，均屬違法態樣'),
+            item('審查意見須具體載明各廠商差異性','各廠商審查意見不可僅寫「符合」、「尚可」或抄錄投標文件頁碼；必須具體比較各廠商在各評審項目上的差異性——此為工程會採購評選作業檢核表明列之重點（準用最有利標精神亦適用）。',['doc','warn'],true,'僅寫「符合」「尚可」是法定重大錯誤態樣，稽核必查'),
+          ]},
+          { label:'簽核', items:[
+            item('評審結果簽報校長核定','載明符合需要者名單及順序，校長核定後才能進行議價。',['doc'],true,'未經校長核定即通知廠商議價，屬程序瑕疵'),
+          ]},
+        ],
+      },
+      {
+        id:'p4', title:'議價與決標', desc:'擇定符合需要者後，仍須辦理議價或比價程序，不可直接決標。',
+        notices:[
+          {type:'law', text:'依手冊規定，取最有利標精神擇定符合需要者後，仍應通知符合需要者進行議價、依序議價或比價後決標，不可省略此程序。'},
+          {type:'warn', text:'議價時不應強制廠商大幅減價，主要目的是確認履約細節（如工作內容、時程、人員配置）；若廠商報價合理且在預算內，可照價決標。'},
+        ],
+        signCard:{
+          title:'議價結果簽呈',
+          timing:'議價完成後、通知得標廠商前',
+          route:['承辦（總務主任）','會計主任（監辦＋會辦）','校長（核定）'],
+          attachments:['評審總表（含各廠商評分）','底價核定表（開封後附上）','議價紀錄表（含監辦人員簽名欄）','得標廠商報價單及企劃書'],
+          notes:['底價應於議價前核定密封，議價時開封','議價過程應製作紀錄，三方（承辦、廠商、監辦）均須簽名','照價決標時無須強迫減價','本方式逾15萬元，須通知主(會)計派員監辦（依政府採購法第13條第2項授權，各地方政府訂定之未達公告金額採購監辦辦法）']
+        },
+        groups:[
+          { label:'議價前準備', items:[
+            item('訂定底價（簽核密封，議價前完成）','【建議路線】參考廠商報價依施行細則第54條第3項訂定底價，簽請校長核定密封——有訂底價就不需另設評審委員會，國小最常用也最不易出錯。報價合理時可照價訂底價。',['doc'],true,'底價查訪資料應具體，不可流於形式（114年稽核第5大缺失）'),
+          ]},
+          { label:'議價', items:[
+            item('通知評分最高之符合需要者進行議價','議價主持人由校長或其授權人員指派。【實務建議】：議價前先依施行細則第54條第3項，參考廠商報價訂定底價，簽請校長核定密封（報價合理時可照價訂底價）——有訂底價就不需另設評審委員會，對國小來說最簡單不易出錯。若廠商報價合理且在預算內，可照價決標，無須強迫減價。',['doc','law']),
+            item('議定履約細節（工作內容、時程、人員等）','不應強制廠商修正已承諾之投標內容；可議定更詳細的執行方式。若採固定費用決標：議價程序仍不得免除，但不應議減價格，僅議定其他內容（如工作細節）。若廠商報價合理且在預算內，可照價決標，無須強迫減價（最有利標作業手冊肆、七、（二）1）。',['doc','law'],true,'採固定費用時議價仍必要，但不應議減價格——此為手冊規定'),
+            item('填寫議價紀錄表，雙方簽名','記錄議定內容、金額，承辦人與廠商代表均須簽名。',['doc'],true,'議價紀錄未製作或雙方未簽名，事後易生爭議'),
+            item('若議價不成，依序洽第2順位廠商','第1順位廠商議價不成，依評審順序洽下一家，並記錄原因。',['law']),
+          ]},
+          { label:'決標', items:[
+            item('議價結果簽報校長核定','校長核定後即完成決標，通知得標廠商。',['doc'],true,'未經校長核定即宣布決標，屬程序瑕疵'),
+            item('辦理決標公告（決標日起30日內上eTender）','依施行細則第84條第3項，決標後30日內刊登採購公報。',['law','date'],true,'決標公告30日期限常被遺忘'),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=2922&lang=1',label:'工程會｜最有利標簽辦文件範例'}],
+      },
+      {
+        id:'p5', title:'簽約、驗收與結案', desc:'',
+        notices:[{type:'warn', text:'驗收紀錄記載過於簡略是114年稽核最常見缺失，務必逐項記載，不可僅寫「核對符合規定」。'}],
+        groups:[
+          { label:'簽約', items:[
+            item('完成書面契約（議價成立後儘速完成）','使用工程會標準契約範本；載明服務項目、金額、期間、驗收條件。',['doc'],true,'口頭約定或未使用標準範本，事後履約爭議多'),
+            item('廠商繳交履約保證金（如招標文件有規定）','保管至驗收合格後退還。',['doc']),
+          ]},
+          { label:'履約管理', items:[
+            item('定期確認廠商履約情形','服務內容、人員、頻率是否符合契約。',['doc'],true,'勞務採購轉包問題是114年稽核第4大缺失'),
+            item('發現轉包情形立即處理','確認實際服務人員是否為廠商自有人力（採購法第65條）。',['law'],true,'清潔、午餐、保全等勞務採購轉包率高，務必確認'),
+          ]},
+          { label:'驗收', items:[
+            item('依契約逐項驗收，填寫驗收紀錄','數量、品質、服務內容逐項記載，不可僅寫「符合規定」。',['doc'],true,'驗收記載過簡是114年稽核第6大缺失'),
+            item('驗收人員（主驗人）及廠商代表簽名','主驗人通常為承辦人或授權主任；廠商代表須到場或書面確認。',['doc']),
+          ]},
+          { label:'結案', items:[
+            item('eTender辦理履約結果公告（驗收合格後30日內）','逾期屬錯誤行為態樣。',['law','date'],true,'履約結果公告30日期限常被遺忘'),
+            item('彙整核銷文件送會計','評審總表、議價紀錄、契約、驗收紀錄、發票，依序裝訂。',['doc'],true,'核銷文件缺件或順序錯誤是被退件主因'),
+            item('採購文件歸檔保存（至少5年）','',['doc']),
+          ]},
+        ],
+      },
+    ];
+  }
+
+  // ── 公開取得3家報價 ──
+  if (m === 'quote') {
+    return [
+      {
+        id:'p1', title:'採購前準備', desc:'15萬以上、未達150萬之採購，須公開取得3家以上書面報價。',
+        notices:[
+          {type:'law', text:'依採購法第49條及施行細則第22條之1，未達公告金額但逾公告金額十分之一（即15萬以上）者，仍應「公開」取得3家以上廠商書面報價或企劃書。'},
+          {type:'warn', text:'注意：分批辦理以規避公告金額者違法。若已知後續有類案採購且有預算，應合計認定（施行細則第6條；113年錯誤行為態樣增列）。'},
+        ],
+        signCard:{
+          title:'採購計畫簽呈',
+          timing:'詢報價公告前，取得授權才能啟動後續流程',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['採購規格說明書','預算科目及可用餘額（會計確認）','預計詢報價公告方式說明'],
+          notes:['本方式未達公告金額150萬，校長核定即可，不需報上級','會計主任在此簽核為「會辦」，確認預算，不同於開標時的「監辦」']
+        },
+        groups:[
+          { label:'需求與預算確認', items:[
+            item('確認採購金額級距（15萬~未達150萬）','計算方式須含分批總額、選購項目及後續擴充金額。',['law'],false,'含分批總額認定常被忽略'),
+            item('向會計確認預算科目及可用餘額','確認科目正確、餘額足夠。',['doc']),
+            item('確認採購性質（財物／勞務／工程）','兼有多種性質時，以金額比率最高者認定。',['law']),
+            item('簽陳採購計畫，簽請校長核定','含採購目的、標的、預算、辦理方式，會計主任會辦。',['doc'],true,'直接詢價而未先上簽呈，是最常見的程序瑕疵'),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=9807&lang=1',label:'工程會｜招標相關文件及表格'}]
+      },
+      {
+        id:'p2', title:'公開詢報價', desc:'「公開」取得報價是本方式的核心，不可私下僅詢問特定廠商。',
+        notices:[{type:'warn', text:'「公開」的意義：應以公告方式讓廠商知悉並有機會報價，不得僅私下接洽特定3家。可用學校公佈欄、eTender或其他公開管道。'}],
+        groups:[
+          { label:'規格書準備', items:[
+            item('訂定採購規格書（功能性規格為主）','避免指定特定品牌型號；如有正當理由需指定，應於文件中說明。',['law','warn'],true,'指定品牌無正當理由是審計查核重點'),
+            item('訂定明確驗收條件','品質標準、尺寸、效能指標、交貨期限均應載明。',['doc']),
+          ]},
+          { label:'公開取得報價', items:[
+            item('公開刊登詢價公告（建議至少7天）','留存公告紀錄；建議上eTender或公佈欄，保留公開性證明。',['doc','date'],true,'未公開而私下詢問特定廠商，性質等同圍標協助'),
+            item('取得3家以上廠商書面報價單','留存廠商名稱、統一編號、報價金額、日期，並請廠商蓋章。',['doc'],true,'不足3家時有兩個合法選項：(1)重新公告辦理；(2)依中央機關未達公告金額採購招標辦法第3條，簽請校長核准後改採限制性招標——改採後【不需重新上網公告】，可直接當場與原投標廠商議價，但底價仍須於議價前核定密封。建議事先於採購計畫簽呈中載明備案，比事後補簽更合規'),
+            item('確認廠商資格（營業登記、無停權紀錄）','至政府電子採購網查詢廠商是否在停權名單中。',['law']),
+          ]},
+        ],
+      },
+      {
+        id:'p3', title:'比價與決定', desc:'',
+        signCard:{
+          title:'比價結果簽呈',
+          timing:'決定廠商後、通知廠商前，須完成簽核',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['比價紀錄表（含3家廠商報價單）','底價核定表（已密封開封）','決定廠商說明'],
+          notes:['底價核定表開封後，應與比價結果一併簽核','若均超底價而洽減，洽減過程須記錄於比價紀錄表']
+        },
+        groups:[
+          { label:'底價與比價', items:[
+            item('訂定底價（簽核密封）','參考市場行情訂定，核定後密封，嚴禁開標前洩漏。',['law','warn'],true,'底價在比價前就要密封核定，不可比價後才補訂'),
+            item('填寫比價紀錄表','記錄3家廠商名稱、報價金額、比價結果及決定廠商理由。',['doc'],true,'驗收紀錄記載過於簡略是114年稽核主要缺失，比價紀錄同樣要具體'),
+            item('以最低合格報價廠商為決定廠商（低於底價）','若均超底價，可洽最低報價廠商減價，最多洽減3次。',['law']),
+          ]},
+          { label:'通知與簽約', items:[
+            item('比價結果簽呈核定後通知決定廠商','書面通知得標廠商，附契約書草本。',['doc']),
+            item('完成簽約（載明規格、金額、交貨期）','使用工程會標準契約範本，勿自行刪改必要條款。',['doc','warn'],true,'未使用工程會標準契約範本屬常見錯誤態樣'),
+            item('通知未獲選廠商',''),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=9807&lang=1',label:'工程會｜招標相關文件及表格'}]
+      },
+      {
+        id:'p4', title:'驗收與核銷', desc:'',
+        notices:[{type:'warn', text:'驗收紀錄記載過於簡略是114年稽核最常見缺失，務必逐項記載所點驗項目及符合契約情形，不可僅寫「核對符合規定」。'}],
+        groups:[
+          { label:'驗收', items:[
+            item('依規格書逐項驗收','數量清點、外觀檢查、功能測試，均需完成並逐項記錄。',['doc'],true,'僅寫「符合規定」4個字是114年稽核第6大缺失'),
+            item('填寫驗收紀錄表並三方簽名','主驗人、協驗人及廠商三方簽名；主驗人通常為承辦主任。',['doc']),
+            item('不合格品項限期改善後重驗','記錄不合格項目、要求改善期限，改善後補充重驗紀錄。',['warn'],true),
+          ]},
+          { label:'核銷結案', items:[
+            item('取得統一發票（抬頭為學校全銜）','品名與採購標的相符；含稅金額一致。',['doc']),
+            item('彙整付款文件送會計核銷','比價紀錄、契約書、驗收紀錄、發票依序裝訂。',['doc'],true,'文件順序錯誤或缺件是核銷被退件主因'),
+            item('採購文件歸檔保存（至少5年）','',['doc']),
+            item('固定資產登錄（單價1萬元以上設備）','辦理財產登錄並貼財產標籤。',['doc'],true,'設備採購常忘記財產登錄'),
+          ]},
+        ],
+      },
+    ];
+  }
+
+  // ── 公開招標 ──
+  if (m === 'open') {
+    const workExtra = t === 'work' ? [
+      item('確認是否需辦理工程規劃設計（含安全衛生圖說）','工程採購應編製職業安全衛生圖說及規範，並量化編列安全衛生費用（採購法第26條之1）。',['law']),
+    ] : [];
+    return [
+      {
+        id:'p1', title:'採購前準備', desc:'招標前的準備決定整個案件的品質，規格書與底價是核心。',
+        notices:[
+          {type:'law', text:`公開招標（150萬元以上）：財物及勞務等標期不得少於14日；工程採購不得少於28日。須上政府電子採購網（eTender）公告。（採購法第28條）`},
+          {type:'warn', text:'注意：分批辦理以規避公告金額屬違法行為；招標文件刊登後若需修改，須重新公告並延長等標期。'},
+        ],
+        signCard:{
+          title:'採購計畫簽呈',
+          timing:'正式公告前，所有準備作業的授權依據',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['採購規格說明書草稿','預算科目及可用餘額（會計確認）','主辦採購人員及監辦人員名單'],
+          notes:['此簽呈核定後，才能正式進行規格書訂定、底價查訪等後續作業','會計主任在此會辦確認預算，開標時還需另行通知擔任監辦']
+        },
+        monitor:[
+          '公告金額（150萬）以上採購，開標、決標、驗收均須通知會計主任擔任監辦人員（採購法第13條）',
+          '【無政風單位時的處理】國小通常無專責政風人員。依《機關主會計及有關單位會同監辦採購辦法》第5條，若本校無政風或其他指定有關單位，可簽請校長核准「免派有關單位人員監辦」，僅由會計主任監辦即可——此為合法程序，建議在本採購案簽呈中一併辦理，不必另補簽呈',
+          '建議在本簽呈核定時，即確認會計主任預排開標、驗收日期，避免臨時無法出席',
+          '達查核金額（財物5000萬／勞務1000萬／工程5000萬）以上，還須另通知上級機關派員監辦'
+        ],
+        groups:[
+          { label:'需求與預算確認', items:[
+            item('確認採購金額達150萬元以上（含分批總額）','分批辦理應依全部批數預算總額認定；選購項目金額亦須計入。',['law'],false,'分批採購總額認定常被忽略'),
+            item('確認採購性質（財物／勞務／工程）',t==='work'?'工程採購另須注意職業安全衛生法規。':'',['law']),
+            item('向會計確認預算科目及可用餘額','',['doc']),
+            item('判斷是否為查核金額以上','財物/工程5000萬以上、勞務1000萬以上須通知上級機關派員監辦。',['law'],true,'查核金額監辦是114年稽核第7大缺失，務必確認'),
+            ...workExtra,
+          ]},
+          { label:'校內行政', items:[
+            item('簽陳採購計畫，會計主任會辦，簽請校長核定','含採購目的、標的、採購方式、預算、預計時程、監辦人員。',['doc'],true,'未先取得授權即開始作業，是最常見的程序瑕疵'),
+            item('確認並通知會計主任擔任監辦人員','開標、決標、驗收三個程序均須會計主任在場。',['law'],true,'忘記通知監辦是114年稽核重要缺失'),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=9807&lang=1',label:'工程會｜招標相關文件及表格'},{url:'https://www.pcc.gov.tw/content/list?eid=2919&lang=1',label:'工程類招標文件範例'},{url:'https://www.pcc.gov.tw/content/list?eid=2920&lang=1',label:'財物類招標文件範例'},{url:'https://www.pcc.gov.tw/content/list?eid=2921&lang=1',label:'勞務類招標文件範例'}]
+      },
+      {
+        id:'p2', title:'規格書與底價', desc:'規格書品質決定招標品質，底價須依法保密。',
+        notices:[{type:'warn', text:'規格書一旦上網公告後若需修改，須重新公告並延長等標期，請確認後再刊登。底價核定後密封，開標前嚴禁洩漏。'}],
+        signCard:{
+          title:'底價核定簽呈（保密文件）',
+          timing:'底價查訪完成後、公告前完成簽核並密封',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['底價核定表（核定後密封）','底價查訪紀錄（至少3家廠商詢價）','工程會價格資料庫查詢結果（如有）'],
+          notes:['底價為保密文件，核定後密封，僅承辦人、監辦人、校長知悉','開標前嚴禁洩漏，否則可能構成採購弊端（採購法第34條）','底價查訪資料應具體充分，不可流於形式（114年稽核第5大缺失）']
+        },
+        groups:[
+          { label:'規格書撰寫', items:[
+            item('採功能性規格，禁止不當限制競爭','不得以特定廠牌型號限制；非屬必要不得要求所有組件須為同一廠牌。',['law','warn'],true,'指定品牌無正當理由是審計查核重點'),
+            item('不得設置不必要投標資格限制','投標資格條件須合理，不得以ISO驗證或特定認證作為排他條件。',['law','warn'],true,'過苛的資格條件屬限制競爭'),
+            item('訂定明確的交貨期、地點、驗收條件','交貨期以「決標後N日內」明確載明；驗收條件可量化。',['doc']),
+            item('訂定保固條款（設備類採購）','載明保固年限、保固範圍及違約處理方式。',['doc']),
+            item('使用工程會標準契約範本','未使用範本易發生錯漏，屬常見錯誤態樣（採購法第63條）。',['law','warn'],true,'未使用工程會標準契約範本是常見缺失'),
+          ]},
+          { label:'底價訂定', items:[
+            item('辦理底價查訪（至少3家廠商詢價）','留存詢價紀錄：廠商名稱、報價單、詢價日期。可參考工程會價格資料庫。',['doc'],true,'底價查訪資料過於簡略是114年稽核第5大缺失'),
+            item('底價簽報核定後密封保存','底價僅承辦人、監辦人及授權長官知悉；開標前嚴禁洩漏。',['law','warn'],true,'底價洩漏可能構成採購弊端，後果嚴重'),
+          ]},
+        ],
+      },
+      {
+        id:'p3', title:'公告刊登', desc:'上網公告是公開招標的核心程序，期限與文件完整性均有法定要求。',
+        notices:[{type:'info', text:'需備齊招標公告、規格說明書、契約書草本，三份文件應一致，上傳前仔細核對。等標期是從公告日起算，不是從上傳完成日起算。'}],
+        groups:[
+          { label:'文件準備', items:[
+            item('備妥招標公告、規格書、契約書草本','三份文件須完整一致，契約書草本應隨招標文件一併公告。',['doc']),
+            item('決定是否收取押標金','建議收取（通常為預算金額1.5%~3%），流廢標時保護機關權益。'),
+            item('確認投標資格條件合理性','不得過苛限制競爭，資格條件須有合理依據。',['law']),
+          ]},
+          { label:'eTender上網公告', items:[
+            item('登入政府電子採購網（eTender）辦理公告','使用機關憑證登入，填寫招標公告表單並上傳招標文件。'),
+            item('確認等標期符合規定',`財物及勞務：不得少於14日曆天；工程：不得少於28日。等標期訂定不合理是114年稽核第2大缺失。`,['law','date','warn'],true,'等標期不足是114年稽核第2大缺失，務必確認天數'),
+            item('記錄公告日期與截止投標日期','開標日通常在截止投標日後1~3個工作天，提前確認場地與監辦人員。',['date']),
+          ]},
+        ],
+      },
+      {
+        id:'p4', title:'開標與決標', desc:'開標程序須依法辦理，程序瑕疵可能導致廢標或爭議。',
+        notices:[{type:'warn', text:`現行規定：須有3家以上合格廠商投標方可開標決標（採購法第48條）。⚠ 注意：採購法修正草案擬取消此限制，草案尚未通過，現行規定仍適用。`}],
+        signCard:{
+          title:'決標結果簽呈',
+          timing:'開標決標完成後、通知得標廠商前，完成簽核',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['開標/決標紀錄表（三方簽名）','廠商投標文件（含資格審查結果）','底價核定表（開封後與決標結果一併附上）'],
+          notes:['會計主任須在開標現場擔任監辦，開標紀錄上須有其簽名','決標後30日內須上eTender辦理決標公告（施行細則第84條第3項），務必設提醒']
+        },
+        monitor:[
+          '開標當日：會計主任須全程在場擔任監辦人員，開標前再次確認其到場',
+          '開標紀錄表上必須有「監辦人員（會計主任）」欄位並請其簽名',
+          '【無政風單位】若已於採購計畫簽呈取得校長核准免派有關單位，此處僅會計主任監辦即可，無須另通知教育局政風室',
+          '若會計主任臨時無法出席，須先取得核准並指定代理人，不可在無監辦人員情形下開標'
+        ],
+        groups:[
+          { label:'開標前準備', items:[
+            item('再次確認監辦人員（會計主任）到場時間','開標前一天再次確認，避免臨時失聯。',['warn'],true,'臨時無監辦人員而強行開標，屬嚴重程序瑕疵'),
+            item('準備開標紀錄表、投標廠商清單','開標前清點標封數量，與投標紀錄核對。',['doc']),
+            item('確認場地（含錄影設備）','部分縣市要求開標過程錄影存證。'),
+          ]},
+          { label:'開標當日', items:[
+            item('確認投標廠商家數達3家','未達3家須廢標，重新公告招標。',['law','warn'],true,'未達3家即廢標，不可強行開標'),
+            item('注意圍標警示跡象','不同廠商領標IP相同、投標文件負責人相同、押標金由同一人領回，均為警示跡象。',['warn'],true,'發現圍標跡象應暫停並通報'),
+            item('當場宣讀各廠商報價','公開進行，記錄廠商名稱與報價金額。',['doc']),
+            item('比對底價決標','最低標且低於底價者得標；均超底價可洽最低標減價，最多3次。',['law']),
+            item('完成開標/決標紀錄，三方簽名','廠商代表、監辦人員（會計主任）、承辦人員三方簽名。',['doc'],true,'監辦人員欄位空白是常見缺失'),
+          ]},
+          { label:'流廢標處理', items:[
+            item('【流標】簽核廢標報告，重新評估規格或預算','流標原因分析後，修改規格書或調高預算，再次辦理招標。',['warn'],true),
+            item('【廢標】7日內退還押標金並書面通知廠商','廢標後7日內退還押標金（採購法第31條）。',['law','date','warn'],true,'7日內退押標金，務必設提醒'),
+            item('辦理決標公告（決標日起30日內上eTender）','依施行細則第84條第3項，決標後30日內須刊登採購公報；逾期屬錯誤行為態樣。',['law','date'],true,'決標公告30日期限常被遺忘（法定為30日，非20日）'),
+          ]},
+        ],
+      },
+      {
+        id:'p5', title:'簽約與履約', desc:'',
+        monitor:[
+          '簽約時：確認廠商繳交履約保證金（如有），保管至驗收合格後退還',
+          '履約期間：定期確認廠商履約進度，發現轉包情形應立即處理（採購法第65條）',
+          '進口貨物：核驗原廠製造證明，勿接受偽變造文件（113年新增錯誤態樣）'
+        ],
+        groups:[
+          { label:'簽約', items:[
+            item('決標後30日內完成簽約','依招標文件規定辦理；逾期廠商得拒絕簽約，簽約期限應於招標文件中載明。',['doc','date','warn'],true,'決標後簽約期限務必追蹤，以招標文件所載為準'),
+            item('確認廠商提交履約保證金（如有）','收到後妥善保管，驗收合格後無息退還，逾期退還屬缺失。',['doc']),
+            item('核對契約書與得標規格一致','規格、數量、單價、交貨期、驗收條件均須核對。'),
+          ]},
+          { label:'履約管理', items:[
+            item('定期確認廠商履約進度','工程類需依工進查核；注意是否有轉包情形（屬違法行為）。',['warn'],true),
+            item('發現廠商轉包應立即處理','招標文件應標示主要部分，並於履約過程確認廠商自行履行（114年稽核第4大缺失）。',['law','warn'],true,'轉包是114年稽核第4大缺失，務必確認'),
+            item('進口貨物核驗原廠製造證明','確認廠商繳交原廠製造證明或檢驗報告，勿接受偽變造文件（113年新增）。',['warn'],true),
+          ]},
+        ],
+      },
+      {
+        id:'p6', title:'驗收與結案', desc:'',
+        notices:[{type:'warn', text:'驗收紀錄記載過於簡略是114年稽核第6大缺失，務必逐項記載所點驗項目及符合契約情形，不可僅寫「核對符合規定」。'}],
+        monitor:[
+          '驗收當日：會計主任須全程在場擔任監辦人員，驗收前再次確認其到場（採購法第13條）',
+          '【無政風單位】若已於採購計畫簽呈取得校長核准免派有關單位，驗收時僅會計主任監辦即可',
+          '驗收紀錄表上必須有「監辦人員（會計主任）」欄位並請其簽名',
+          '驗收合格後30日內：上eTender辦理履約結果公告，逾期屬錯誤行為態樣'
+        ],
+        groups:[
+          { label:'驗收', items:[
+            item('組成驗收小組並通知監辦人員','主驗人通常為校長或授權之主任，監辦人員（會計主任）須在場。',['warn'],true,'忘記通知監辦人員參與驗收是常見缺失'),
+            item('依規格書逐項驗收','數量清點、外觀、功能測試，均需完成並逐項記錄，不可僅寫「符合規定」。',['doc'],true,'驗收記載過簡是114年稽核第6大缺失'),
+            item('填寫驗收紀錄並三方簽名','主驗、監辦（會計主任）及廠商三方簽名。',['doc'],true,'監辦人員欄位空白是常見缺失'),
+            item('不合格品項限期改善後重驗','記錄不合格項目、要求改善期限，改善後補充重驗紀錄。',['warn'],true),
+          ]},
+          { label:'付款核銷', items:[
+            item('取得統一發票（抬頭為學校全銜）','品名須與採購標的一致。',['doc']),
+            item('彙整付款文件送會計核銷','決標紀錄、契約書、驗收紀錄、發票，依序裝訂。',['doc']),
+            item('退還履約保證金（驗收合格後）','無息退還，留存廠商收據；逾期退還屬缺失。',['warn'],true,'履約保證金忘記退是常見遺漏'),
+          ]},
+          { label:'結案作業', items:[
+            item('eTender辦理履約結果公告（驗收合格後30日內）','逾期屬錯誤行為態樣。',['law','date'],true,'履約結果公告30日期限常被遺忘'),
+            item('採購文件裝訂歸檔（至少5年）','含簽呈、招標文件、開標紀錄、契約書、驗收紀錄、發票核銷單。',['doc']),
+            item('固定資產財產登錄（單價1萬元以上設備）','辦理財產登錄並貼財產標籤。',['doc'],true,'設備採購常忘記財產登錄'),
+          ]},
+        ],
+      },
+    ];
+  }
+
+  // ── 限制性招標 ──
+  if (m === 'limited') {
+    return [
+      {
+        id:'p1', title:'法定情形確認', desc:'限制性招標須符合採購法第22條第1項所列各款，不得任意適用。',
+        notices:[
+          {type:'warn', text:'限制性招標屬「例外」程序，須有法定依據，不得為便利或熟識廠商而使用。使用前務必確認適用款項，並完整記錄理由。'},
+          {type:'law', text:'採購法第22條第1項共列16款適用情形，常見如：流標後重辦（第1款）、專屬權利/獨家供應（第2款）、緊急事故（第3款）、後續維修（第4款）。'},
+        ],
+        signCard:{
+          title:'限制性招標核准簽呈',
+          timing:'所有後續作業前，必須先取得校長核准',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['法定情形說明書（具體說明符合第幾款及理由）','廠商獨家供應或資格說明文件（如有）','預算科目及可用餘額（會計確認）'],
+          notes:['理由必須具體明確，不可僅寫「因業務需要」或「時間緊迫」','採購金額達公告金額以上，開標（議價）仍須通知會計主任監辦']
+        },
+        monitor:[
+          '採購金額達公告金額（150萬）以上：議價、驗收均須通知會計主任擔任監辦人員',
+          '未達公告金額：依新竹市規定，仍建議通知會計主任會同'
+        ],
+        groups:[
+          { label:'法定情形確認', items:[
+            item('確認符合採購法第22條第1項哪一款','書面記錄適用款項及具體理由，備查核用。',['law','doc','warn'],true,'理由模糊或牽強是最常被查核的問題'),
+            item('確認非以便利特定廠商為目的','限制性招標不得作為圖利特定廠商之手段（採購法第6條）。',['law','warn'],true,'為熟識廠商使用限制性招標屬違法'),
+            item('簽陳適用理由，會計主任會辦，簽請校長核定','理由須具體明確。',['doc'],true,'未先取得授權即進行議價，是最常見的程序瑕疵'),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=9807&lang=1',label:'工程會｜招標相關文件及表格'}]
+      },
+      {
+        id:'p2', title:'議價作業', desc:'',
+        notices:[{type:'info', text:'議價時應以市場合理價格為基準，不得因已確定廠商而放棄議價，應留存完整議價紀錄。'}],
+        signCard:{
+          title:'議價結果簽呈',
+          timing:'議價完成後、通知廠商前，完成簽核',
+          route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
+          attachments:['議價紀錄表（三方簽名）','底價核定表（開封後附上）','廠商報價單'],
+          notes:['公告金額以上案件：議價紀錄須有監辦人員（會計主任）簽名','底價查訪資料應具體，不可流於形式（114年稽核第5大缺失）']
+        },
+        monitor:[
+          '公告金額（150萬）以上：議價時會計主任須到場擔任監辦，議價紀錄上須有其簽名（採購法第13條同時規定有關單位會同，請確認是否需通知政風或其他指定單位）',
+          '議價前再次確認會計主任可出席時間，提前排定議價日期'
+        ],
+        groups:[
+          { label:'議價前準備', items:[
+            item('訂定底價（簽核密封）','參考市場行情、廠商過去報價或工程會價格資料庫，資料須具體充分。',['law','warn'],true,'底價查訪流於形式是114年稽核第5大缺失'),
+            item('備妥議價通知書，送達廠商','告知議價時間、地點及應準備文件。',['doc']),
+            item('確認監辦人員（會計主任）到場','公告金額以上須主（會）計會同。',['law'],true,'忘記通知監辦是常見且嚴重的缺失'),
+          ]},
+          { label:'議價當日', items:[
+            item('確認廠商報價並進行議價','議價結果應低於或等於底價。',['law']),
+            item('填寫議價紀錄表，三方簽名','承辦人、監辦人（會計主任）、廠商代表三方簽名。',['doc'],true,'監辦人員欄位空白是常見缺失'),
+            item('議價未成立之處理','若廠商報價均超底價，可重新評估底價或改以其他方式辦理。',['warn'],true),
+          ]},
+        ],
+      },
+      {
+        id:'p3', title:'簽約、驗收與結案', desc:'',
+        monitor:[
+          '驗收時：公告金額以上案件，會計主任須到場擔任監辦，驗收紀錄須有其簽名',
+          '驗收合格後30日內：上eTender辦理履約結果公告'
+        ],
+        groups:[
+          { label:'簽約', items:[
+            item('完成簽約（議價成立後30日內）','契約載明規格、數量、金額、交貨期、驗收條件。',['doc','date'],false,'議價後30日簽約期限務必追蹤'),
+          ]},
+          { label:'驗收核銷', items:[
+            item('通知監辦人員參與驗收（公告金額以上）','驗收前通知會計主任，驗收紀錄須有其簽名。',['law'],true,'忘記通知監辦驗收是常見缺失'),
+            item('依規格書逐項驗收並填寫紀錄','逐項記載所點驗項目及符合情形，不可僅寫「符合規定」。',['doc'],true,'驗收記載過簡是114年稽核第6大缺失'),
+            item('取得發票、送會計核銷','',['doc']),
+            item('採購文件歸檔保存（至少5年）','',['doc']),
+          ]},
+          { label:'eTender公告', items:[
+            item('辦理決標公告（決標日起30日內）','依施行細則第84條第3項，限制性招標亦須辦理決標公告，逾期屬錯誤行為態樣。',['law','date'],true,'決標公告30日期限常被遺忘（法定為30日，非20日）'),
+            item('辦理履約結果公告（驗收合格後30日內）','逾期屬錯誤行為態樣。',['law','date'],true,'履約結果公告30日期限常被遺忘'),
+          ]},
+        ],
+        officialLinks:[{url:'https://www.pcc.gov.tw/content/list?eid=9807&lang=1',label:'工程會｜招標相關文件及表格'}]
+      },
+    ];
+  }
+  return [];
+}
+
+// ── 啟動流程 ──
+function startFlow() {
+  const phases = getPhases();
+  currentPhases = phases;
+  checked = {};
+  phases.forEach((p, pi) => {
+    p.groups.forEach(g => {
+      g.items.forEach((item, i) => {
+        checked[`${p.id}-${g.label}-${i}`] = false;
+      });
+    });
+    // 初始化簽呈卡片的 checkbox key
+    if (p.signCard) {
+      (p.signCard.attachments||[]).forEach((_,i) => { checked[`sc_att_${pi}_${i}`] = false; });
+      (p.signCard.notes||[]).forEach((_,i) => { checked[`sc_note_${pi}_${i}`] = false; });
+    }
+  });
+  currentPhase = 0;
+  currentCaseId = null;
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('flowScreen').style.display = 'block';
+  document.getElementById('caseSaveRow').style.display = 'none';
+  // 預填案件名稱
+  if (document.getElementById('caseNameInput')) {
+    const methodMap = {small:'小額採購',quote:'3家報價',spirit:'取最有利標精神',open:'公開招標',limited:'限制性招標'};
+    document.getElementById('caseNameInput').value = `${new Date().getFullYear()-1911}年${methodMap[selectedMethod]||''}`;
+  }
+  renderFlow(phases);
+  updateProgress(phases);
+}
+
+function renderFlow(phases) {
+  // 分頁導覽
+  const nav = document.getElementById('phaseNav');
+  nav.innerHTML = phases.map((p, i) => {
+    const total = p.groups.reduce((s,g)=>s+g.items.length,0);
+    const done = p.groups.reduce((s,g)=>s+g.items.filter((_,j)=>checked[`${p.id}-${g.label}-${j}`]).length,0);
+    const isDone = done === total;
+    const isActive = i === currentPhase;
+    return `<button class="phase-tab ${isDone?'done':isActive?'active':''}" onclick="goPhase(${i},${JSON.stringify(phases).replace(/"/g,'&quot;')})">
+      <span class="tab-dot"></span>${i+1}. ${p.title}
+    </button>`;
+  }).join('');
+
+  // 面板
+  const container = document.getElementById('phaseContainer');
+  const p = phases[currentPhase];
+  const total = p.groups.reduce((s,g)=>s+g.items.length,0);
+  const done = p.groups.reduce((s,g)=>s+g.items.filter((_,j)=>checked[`${p.id}-${g.label}-${j}`]).length,0);
+
+  let html = `<div class="phase-panel active">`;
+  html += `<div class="phase-header">
+    <div class="phase-num">0${currentPhase+1}</div>
+    <div class="phase-hd-text"><h2>${p.title}</h2><p>${p.desc}</p></div>
+  </div>`;
+
+  // 注意框
+  (p.notices||[]).forEach(n => {
+    const icons = {warn:'⚠️', info:'ℹ️', law:'⚖️'};
+    html += `<div class="notice-box ${n.type}"><span class="notice-icon">${icons[n.type]}</span><span>${n.text}</span></div>`;
+  });
+
+  // ── 簽呈卡片 ──
+  if (p.signCard) {
+    const sc = p.signCard;
+    const routeHtml = sc.route.map(r => `<span class="sign-route-step">${r}</span>`).join('<span class="sign-route-arrow">→</span>');
+    const attachHtml = (sc.attachments||[]).map((a,i) => {
+      const k = `sc_att_${currentPhase}_${i}`;
+      const isChk = checked[k] ? 'checked' : '';
+      return `<div class="sign-check-row"><input type="checkbox" id="${k}" ${isChk} onchange="toggleSignCard('${k}')"><label for="${k}">${a}</label></div>`;
+    }).join('');
+    const noteHtml = (sc.notes||[]).map((n,i) => {
+      const k = `sc_note_${currentPhase}_${i}`;
+      const isChk = checked[k] ? 'checked' : '';
+      return `<div class="sign-check-row"><input type="checkbox" id="${k}" ${isChk} onchange="toggleSignCard('${k}')"><label for="${k}">${n}</label></div>`;
+    }).join('');
+    html += `<div class="sign-card">
+      <div class="sign-card-header">📋 本階段需要上簽呈｜${sc.title}</div>
+      <div class="sign-card-body">
+        <div class="sign-field">
+          <div class="sign-field-label">⏰ 時間點</div>
+          <div class="sign-field-value">${sc.timing}</div>
+        </div>
+        <div class="sign-field">
+          <div class="sign-field-label">✍️ 簽核路線</div>
+          <div class="sign-route">${routeHtml}</div>
+        </div>
+        ${attachHtml ? `<div class="sign-field full-width">
+          <div class="sign-field-label">📎 應附附件</div>
+          <div class="sign-checklist">${attachHtml}</div>
+        </div>` : ''}
+        ${noteHtml ? `<div class="sign-field full-width">
+          <div class="sign-field-label">⚠️ 注意事項</div>
+          <div class="sign-checklist">${noteHtml}</div>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  // ── 監辦警示 ──
+  if (p.monitor) {
+    const rows = p.monitor.map(m => `<div class="monitor-row"><div class="monitor-dot"></div><div>${m}</div></div>`).join('');
+    html += `<div class="monitor-alert">
+      <div class="monitor-alert-header">🔔 監辦通知提醒｜這個步驟要通知會計主任</div>
+      <div class="monitor-alert-body">${rows}</div>
+    </div>`;
+  }
+
+  // ── 期限計算器（有 date tag 的階段才顯示）──
+  const hasDate = p.groups.some(g=>g.items.some(it=>it.tags&&it.tags.includes('date')));
+  if (hasDate) {
+    html += `<div class="deadline-panel" id="dc_${p.id}_panel">
+      <div class="deadline-panel-title">📅 期限計算器｜填入關鍵日期，自動推算截止期限</div>
+      <div class="deadline-inputs" id="dc_${p.id}_inputs">${renderDeadlineInputs(p)}</div>
+      <div class="deadline-results" id="dc_${p.id}_results"><span style="font-size:0.75rem;color:var(--ink-light)">填入日期後自動顯示截止日</span></div>
+    </div>`;
+  }
+
+  // 清單
+  p.groups.forEach(g => {
+    html += `<div class="group-wrap"><div class="group-label">${g.label}</div>`;
+    g.items.forEach((item, i) => {
+      const key = `${p.id}-${g.label}-${i}`;
+      const isChecked = checked[key];
+      const isWarn = item.warn && !isChecked;
+      const cls = isChecked ? 'checked' : isWarn ? 'warn-item' : '';
+
+      const tags = (item.tags||[]).map(t => {
+        const map = {doc:['tag-doc','文件'],date:['tag-date','期限'],warn:['tag-warn','注意'],tip:['tag-tip','技巧']};
+        if (t === 'law') {
+          const safeTitle = item.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          const safeDesc = item.desc.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          return `<span class="tag tag-law" onclick="event.stopPropagation(); openLawModal('${safeTitle}','${safeDesc}')" title="點擊詢問 AI 法條說明">⚖ 法規</span>`;
+        }
+        return `<span class="tag ${map[t][0]}">${map[t][1]}</span>`;
+      }).join('');
+
+      // 易漏點標籤
+      const missTag = item.miss
+        ? `<span class="tag-miss-wrap"><span class="tag tag-miss" onclick="event.stopPropagation()">⚠ 易漏</span><div class="miss-tooltip">${item.miss}</div></span>`
+        : '';
+
+      html += `<div class="check-item ${cls}" onclick="toggleItem('${key}', ${JSON.stringify(phases).replace(/"/g,'&quot;')})">
+        <div class="chk-box"><span class="chk-mark">✓</span></div>
+        <div class="item-body">
+          <div class="item-title">${item.title}<span class="item-tags">${tags}${missTag}</span></div>
+          <div class="item-desc">${item.desc}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  // 官方連結
+  if (p.officialLinks && p.officialLinks.length > 0) {
+    const linksHtml = p.officialLinks.map(l =>
+      `<a class="btn-official-link" href="${l.url}" target="_blank" rel="noopener">🔗 ${l.label}</a>`
+    ).join('');
+    html += `<div class="official-links-section">
+      <div class="official-links-title">📎 工程會官方範本下載</div>
+      <div class="official-links-row">${linksHtml}</div>
+    </div>`;
+  }
+
+  // 計算本階段未完成的易漏點數量
+  const warnUnfinished = p.groups.reduce((acc, g) => {
+    return acc + g.items.filter((it, i) => it.warn && !checked[`${p.id}-${g.label}-${i}`]).length;
+  }, 0);
+  const nextDisabled = warnUnfinished > 0 ? 'disabled' : '';
+  const nextTitle = warnUnfinished > 0 ? `title="尚有 ${warnUnfinished} 個易漏點未確認，請確認後再進行下一步驟"` : '';
+
+  // 導覽
+  html += `<div class="nav-row">
+    <button class="btn-nav btn-outline" onclick="goPhase(${currentPhase-1}, ${JSON.stringify(phases).replace(/"/g,'&quot;')})" ${currentPhase===0?'disabled':''}>← 上一步驟</button>
+    <div class="phase-stat">
+      已完成 <span>${done}</span> / ${total} 項
+      ${warnUnfinished > 0 ? `<span class="warn-unfinished">⚠ 尚有 ${warnUnfinished} 個易漏點未確認</span>` : ''}
+    </div>
+    ${currentPhase < phases.length-1
+      ? `<button class="btn-nav btn-primary" ${nextDisabled} ${nextTitle} onclick="goPhase(${currentPhase+1}, ${JSON.stringify(phases).replace(/"/g,'&quot;')})">下一步驟 →</button>`
+      : `<button class="btn-nav btn-primary" ${nextDisabled} ${nextTitle} onclick="showComplete()">完成結案 ✓</button>`
+    }
+  </div>`;
+  html += `</div>`;
+  container.innerHTML = html;
+
+  // 初始化期限計算器
+  if (hasDate) initDeadlineCalc(p);
+}
+
+
+function goPhase(idx, phases) {
+  if (idx < 0 || idx >= phases.length) return;
+  currentPhase = idx;
+  currentPhases = phases;
+  renderFlow(phases);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function toggleItem(key, phases) {
+  checked[key] = !checked[key];
+  updateProgress(phases);
+  renderFlow(phases);
+}
+
+function toggleSignCard(key) {
+  checked[key] = !checked[key];
+  updateProgress(currentPhases);
+}
+
+function updateProgress(phases) {
+  const total = Object.keys(checked).length;
+  const done = Object.values(checked).filter(Boolean).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressLabel').textContent = `整體完成度 ${pct}%`;
+}
+
+function copyTemplate(id, btn) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '已複製 ✓';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '複製範本文字'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function showComplete() {
+  document.getElementById('flowScreen').style.display = 'none';
+  document.getElementById('completeScreen').style.display = 'block';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = '整體完成度 100%';
+}
+
+// ── 期限計算器 ──
+const DEADLINE_CONFIGS = {
+  // 以 phase id 為 key，定義輸入欄位與計算規則
+  spirit_p2: {
+    inputs: [
+      { id:'pub_date', label:'公告日期' },
+      { id:'tender_round', label:'第幾次公告', type:'select', options:[
+        {value:'1', label:'第1次公告'},
+        {value:'2', label:'第2次公告（不足3家後重行）'},
+      ]},
+    ],
+    calcs: [
+      { label:'截止收件日（最少5天，建議7天以上）', days:7, days2nd:3, roundRef:'tender_round' },
+    ],
+    note2nd:'第2次公告廠商家數得不受3家限制；等標期可縮短至3日（招標期限標準第8條）；須公告內容未經重大改變。'
+  },
+  quote_p2: {
+    inputs: [
+      { id:'pub_date', label:'公告/詢報價日期' },
+      { id:'tender_round', label:'第幾次公告', type:'select', options:[
+        {value:'1', label:'第1次公告'},
+        {value:'2', label:'第2次公告（不足3家後重行）'},
+      ]},
+    ],
+    calcs: [
+      { label:'截止收件日（建議至少7天）', days: 7, days2nd: 3, roundRef:'tender_round' },
+    ],
+    note2nd:'第2次公告廠商家數得不受3家限制；等標期可縮短至3日（招標期限標準第8條第2項）；須公告內容未經重大改變。'
+  },
+  open_p3: {
+    inputs: [
+      { id:'pub_date', label:'招標公告日期' },
+      { id:'tender_round', label:'第幾次招標', type:'select', options:[
+        {value:'1', label:'第1次招標'},
+        {value:'2', label:'第2次招標（流標後重行）'},
+      ]},
+    ],
+    calcs: [
+      { label:'最早截止投標日（財物/勞務）', days:14, days2nd:7, roundRef:'tender_round' },
+      { label:'最早截止投標日（工程）', days:28, days2nd:7, roundRef:'tender_round' },
+    ],
+    note2nd:'第二次招標等標期可縮短：財物/勞務/工程均不得少於7日（招標期限標準第8條第2項）；須招標文件內容未經重大改變。'
+  },
+  open_p4: {
+    inputs: [
+      { id:'open_date', label:'開標/決標日期' },
+      { id:'tender_cancel', label:'廢標日期（若有）' },
+    ],
+    calcs: [
+      { label:'決標公告截止（決標後30天）', srcId:'open_date', days: 30 },
+      { label:'簽約截止（依招標文件規定，通常為決標後30天）', srcId:'open_date', days: 30 },
+      { label:'退還押標金截止（廢標後7天）', srcId:'tender_cancel', days: 7 },
+    ]
+  },
+  open_p5: {
+    inputs: [{ id:'sign_date', label:'簽約日期' }],
+    calcs: [
+      { label:'履約保證金繳交截止（建議簽約後14天內）', days: 14 },
+    ]
+  },
+  open_p6: {
+    inputs: [
+      { id:'accept_date', label:'驗收合格日期' },
+    ],
+    calcs: [
+      { label:'履約結果公告截止（驗收合格後30天）', days: 30 },
+      { label:'退還履約保證金（驗收合格後無息退還）', days: 7 },
+    ]
+  },
+  small_p3: {
+    inputs: [{ id:'buy_date', label:'訂購/簽約日期' }],
+    calcs: [
+      { label:'驗收期限（建議訂購後30天內）', days: 30 },
+    ]
+  },
+};
+
+function getDeadlineConfig(phase) {
+  // 依採購方式+phase id 組合
+  const key = `${selectedMethod}_${phase.id}`;
+  return DEADLINE_CONFIGS[key] || null;
+}
+
+function renderDeadlineInputs(phase) {
+  const cfg = getDeadlineConfig(phase);
+  if (!cfg) {
+    return `<div class="deadline-input-group">
+      <label>關鍵日期</label>
+      <input type="date" id="dc_main_date" onchange="calcDeadlines('${phase.id}')">
+    </div>`;
+  }
+  return cfg.inputs.map(inp => {
+    if (inp.type === 'select') {
+      const opts = inp.options.map(o => `<option value="${o.value}">${o.label}</option>`).join('');
+      return `<div class="deadline-input-group">
+        <label>${inp.label}</label>
+        <select id="dc_${inp.id}" onchange="calcDeadlines('${phase.id}')" style="padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:0.82rem;font-family:inherit;">${opts}</select>
+      </div>`;
+    }
+    return `<div class="deadline-input-group">
+      <label>${inp.label}</label>
+      <input type="date" id="dc_${inp.id}" onchange="calcDeadlines('${phase.id}')">
+    </div>`;
+  }).join('');
+}
+
+function calcDeadlines(phaseId) {
+  const cfg = Object.keys(DEADLINE_CONFIGS).find(k => k.endsWith(`_${phaseId}`))
+    ? DEADLINE_CONFIGS[Object.keys(DEADLINE_CONFIGS).find(k => k.endsWith(`_${phaseId}`))]
+    : null;
+  const resultsEl = document.getElementById(`dc_${phaseId}_results`);
+  if (!resultsEl) return;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  let chips = '';
+
+  if (cfg) {
+    // 先判斷是否為第二次招標
+    let is2nd = false;
+    if (cfg.inputs.find(i => i.id === 'tender_round')) {
+      const sel = document.getElementById('dc_tender_round');
+      is2nd = sel && sel.value === '2';
+    }
+    cfg.calcs.forEach(calc => {
+      const srcId = calc.srcId || cfg.inputs[0].id;
+      const inp = document.getElementById(`dc_${srcId}`);
+      if (!inp || !inp.value) return;
+      const base = new Date(inp.value);
+      const useDays = (is2nd && calc.days2nd !== undefined) ? calc.days2nd : calc.days;
+      const result = new Date(base); result.setDate(result.getDate() + useDays);
+      const diff = Math.ceil((result - today) / 86400000);
+      const cls = diff < 0 ? 'overdue' : diff <= 7 ? 'soon' : '';
+      const label = diff < 0 ? `⚠ 已過期${Math.abs(diff)}天` : diff === 0 ? '⚠ 今天截止' : `還有${diff}天`;
+      const roundNote = is2nd && calc.days2nd !== undefined ? `（第二次縮短為${calc.days2nd}日）` : `（${useDays}日）`;
+      chips += `<div class="deadline-chip ${cls}">
+        <span class="chip-label">${calc.label}${roundNote}</span>
+        <strong>${result.getFullYear()-1911}/${result.getMonth()+1}/${result.getDate()}</strong>
+        <span>(${label})</span>
+      </div>`;
+    });
+    // 第二次招標提示
+    if (is2nd && cfg.note2nd) {
+      chips += `<div class="deadline-chip" style="border-color:var(--info);background:#eff6ff;color:#1e40af;width:100%;max-width:100%;">
+        <span class="chip-label">📋 法規說明</span>
+        <span style="font-size:0.75rem;">${cfg.note2nd}</span>
+      </div>`;
+    }
+  } else {
+    const inp = document.getElementById('dc_main_date');
+    if (!inp || !inp.value) return;
+    const base = new Date(inp.value);
+    [7,14,20,30].forEach(d => {
+      const r = new Date(base); r.setDate(r.getDate()+d);
+      chips += `<div class="deadline-chip"><span class="chip-label">${d}天後</span><strong>${r.getFullYear()-1911}/${r.getMonth()+1}/${r.getDate()}</strong></div>`;
+    });
+  }
+
+  resultsEl.innerHTML = chips || '<span style="font-size:0.75rem;color:var(--ink-light)">填入日期後自動顯示截止日</span>';
+}
+
+function initDeadlineCalc(phase) {
+  // 掛載 change 事件（HTML已有 onchange，這裡補充動態掛載）
+  const cfg = getDeadlineConfig(phase);
+  if (cfg) {
+    cfg.inputs.forEach(inp => {
+      const el = document.getElementById(`dc_${inp.id}`);
+      if (el) el.addEventListener('change', () => calcDeadlines(phase.id));
+    });
+  }
+}
+
+// ── 案件管理 (localStorage) ──
+const STORAGE_KEY = 'procurementCases_v1';
+let currentCaseId = null;
+
+function loadAllCases() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch { return []; }
+}
+function saveAllCases(cases) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
+}
+
+function toggleCasePanel() {
+  const panel = document.getElementById('casePanel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) renderCasePanel();
+  // 顯示/隱藏儲存列：只在流程進行中才顯示
+  const inFlow = document.getElementById('flowScreen').style.display !== 'none';
+  document.getElementById('caseSaveRow').style.display = isOpen && inFlow ? 'block' : 'none';
+}
+
+function renderCasePanel() {
+  const cases = loadAllCases();
+  const badge = document.getElementById('caseBadge');
+  if (badge) badge.textContent = cases.length;
+
+  const body = document.getElementById('casePanelBody');
+  if (cases.length === 0) {
+    body.innerHTML = '<div class="case-empty">尚無儲存的案件<br>開始流程後點擊「儲存進度」即可保存</div>';
+    return;
+  }
+  body.innerHTML = cases.map(c => {
+    const pct = c.total ? Math.round(c.done/c.total*100) : 0;
+    const pctCls = pct < 30 ? 'low' : pct < 70 ? 'mid' : 'high';
+    const methodMap = {small:'小額採購',quote:'3家報價',spirit:'取最有利標精神',open:'公開招標',limited:'限制性招標'};
+    const typeMap = {goods:'財物',service:'勞務',work:'工程'};
+    return `<div class="case-card">
+      <div class="case-card-title">${c.name}</div>
+      <div class="case-card-meta">
+        <span>${methodMap[c.method]||c.method}</span>
+        <span>${typeMap[c.type]||c.type}</span>
+        <span>${c.school||''}</span>
+        <span>${new Date(c.savedAt).toLocaleDateString('zh-TW')}</span>
+      </div>
+      <div class="case-card-pct ${pctCls}">${pct}% 完成</div>
+      <div class="case-card-actions">
+        <button class="case-btn case-btn-load" onclick="loadCase('${c.id}')">📂 載入繼續</button>
+        <button class="case-btn case-btn-del" onclick="deleteCase('${c.id}')">🗑 刪除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveCase() {
+  const nameInput = document.getElementById('caseNameInput');
+  const name = nameInput.value.trim();
+  if (!name) { nameInput.focus(); return; }
+
+  const total = Object.keys(checked).length;
+  const done = Object.values(checked).filter(Boolean).length;
+
+  const cases = loadAllCases();
+  const id = currentCaseId || `case_${Date.now()}`;
+  const existing = cases.findIndex(c => c.id === id);
+
+  const caseData = {
+    id, name,
+    method: selectedMethod, type: selectedType, school: schoolName,
+    phase: currentPhase, checked: {...checked},
+    total, done, savedAt: new Date().toISOString()
+  };
+
+  if (existing >= 0) cases[existing] = caseData;
+  else cases.unshift(caseData);
+
+  saveAllCases(cases);
+  currentCaseId = id;
+  renderCasePanel();
+
+  // 視覺回饋
+  const btn = document.querySelector('.case-btn-save');
+  if (btn) { btn.textContent = '✓ 已儲存'; setTimeout(()=>btn.textContent='💾 儲存目前進度',2000); }
+  const badge = document.getElementById('caseBadge');
+  if (badge) badge.textContent = cases.length;
+}
+
+function loadCase(id) {
+  const cases = loadAllCases();
+  const c = cases.find(x=>x.id===id);
+  if (!c) return;
+
+  selectedMethod = c.method;
+  selectedType = c.type;
+  schoolName = c.school || '';
+  currentPhase = c.phase || 0;
+  checked = {...c.checked};
+  currentCaseId = id;
+
+  document.getElementById('casePanel').classList.remove('open');
+  document.getElementById('completeScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('flowScreen').style.display = 'block';
+
+  if (document.getElementById('caseNameInput')) {
+    document.getElementById('caseNameInput').value = c.name;
+  }
+
+  const phases = getPhases();
+  renderFlow(phases);
+  updateProgress(phases);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function deleteCase(id) {
+  if (!confirm('確定要刪除這筆案件紀錄嗎？')) return;
+  const cases = loadAllCases().filter(c=>c.id!==id);
+  saveAllCases(cases);
+  if (currentCaseId === id) currentCaseId = null;
+  renderCasePanel();
+  const badge = document.getElementById('caseBadge');
+  if (badge) badge.textContent = cases.length;
+}
+
+// 初始化時更新 badge
+window.addEventListener('DOMContentLoaded', () => {
+  const cases = loadAllCases();
+  const badge = document.getElementById('caseBadge');
+  if (badge) badge.textContent = cases.length;
+});
+
+function resetAll() {
+  selectedMethod = null; selectedType = null; schoolName = '';
+  checked = {}; currentPhase = 0;
+  document.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('schoolName').value = '';
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('completeScreen').style.display = 'none';
+  document.getElementById('flowScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'block';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressLabel').textContent = '整體完成度 0%';
+  window.scrollTo({top:0});
+}
+</script>
+</body>
+</html>
