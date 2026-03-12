@@ -1196,9 +1196,36 @@ header {
       </div>
     </div>
 
+    <div class="divider"></div>
+
+    <div class="step-title"><div class="step-num">3</div> 填入案件基本資料</div>
+    <div class="step-subtitle">將自動帶入各階段簽呈要素，確保全案文件一致</div>
+    <div style="padding-left:38px; margin-top:14px; display:flex; flex-direction:column; gap:14px;">
+      <div>
+        <label style="display:block; font-size:0.78rem; font-weight:700; color:var(--ink-light); margin-bottom:6px;">採購案名稱</label>
+        <input type="text" id="projectName" placeholder="例：114學年度午餐採購案" maxlength="50"
+          style="width:340px; max-width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; font-family:'Noto Sans TC',sans-serif; font-size:0.88rem; color:var(--ink); background:white; outline:none; transition:border-color 0.2s;"
+          oninput="updateProjectInfo()" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'">
+      </div>
+      <div>
+        <label style="display:block; font-size:0.78rem; font-weight:700; color:var(--ink-light); margin-bottom:6px;">預算金額（新臺幣）</label>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <input type="number" id="budgetAmount" placeholder="0" min="0"
+            style="width:180px; padding:10px 14px; border:1.5px solid var(--border); border-radius:8px; font-family:'Noto Sans TC',sans-serif; font-size:0.88rem; color:var(--ink); background:white; outline:none; transition:border-color 0.2s;"
+            oninput="updateProjectInfo()" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'">
+          <span style="font-size:0.85rem; color:var(--ink-light);">元</span>
+          <span id="budgetDisplay" style="font-size:0.82rem; color:var(--ink-mid); font-weight:500;"></span>
+        </div>
+        <div id="budgetWarning" style="display:none; margin-top:8px; padding:10px 14px; background:#fff0f0; border:1.5px solid #fca5a5; border-radius:8px; font-size:0.8rem; color:#9b1c1c; line-height:1.6;"></div>
+        <div style="margin-top:6px; font-size:0.75rem; color:var(--ink-light); line-height:1.6;">
+          💡 依採購法施行細則第6條，金額須含後續擴充及同年度同類採購總額，不得化整為零分批辦理（採購法第14條）
+        </div>
+      </div>
+    </div>
+
     <div class="start-btn-wrap" style="margin-top:28px;">
       <button class="start-btn" id="startBtn" onclick="startFlow()" disabled>產生採購流程 →</button>
-      <div style="font-size:0.75rem; color:var(--ink-light); margin-top:8px; padding-left:0;">請先完成步驟 1 與步驟 2</div>
+      <div style="font-size:0.75rem; color:var(--ink-light); margin-top:8px; padding-left:0;">請先完成步驟 1、2，並填入案件資料</div>
     </div>
   </div>
 
@@ -1614,6 +1641,8 @@ let selectedMethod = null;
 let selectedType = null;
 let selectedAward = null;  // 決標方式：lowest / spirit / quasi / full
 let schoolName = '';
+let projectName = '';
+let budgetAmount = 0;
 let currentPhase = 0;
 let checked = {};
 let currentPhases = [];
@@ -1642,13 +1671,59 @@ function selectAward(el) {
 }
 
 function checkReady() {
-  const ready = selectedMethod && selectedType;
+  const ready = selectedMethod && selectedType && projectName.trim() && budgetAmount > 0;
   document.getElementById('startBtn').disabled = !ready;
+}
+
+function updateProjectInfo() {
+  projectName = (document.getElementById('projectName').value || '').trim();
+  budgetAmount = parseFloat(document.getElementById('budgetAmount').value) || 0;
+
+  // 金額顯示中文
+  const disp = document.getElementById('budgetDisplay');
+  if (budgetAmount > 0) {
+    disp.textContent = '（' + formatMoney(budgetAmount) + '）';
+  } else {
+    disp.textContent = '';
+  }
+
+  // 金額防呆：與選擇路線交叉比對
+  const warn = document.getElementById('budgetWarning');
+  const method = selectedMethod;
+  let warnMsg = '';
+  if (method && budgetAmount > 0) {
+    if (method === 'small' && budgetAmount >= 150000) {
+      warnMsg = '⚠ 本案金額已達或逾 15 萬元小額採購上限，請退回步驟1重選「公開取得3家報價」或「取最有利標精神」。';
+    } else if ((method === 'quote' || method === 'spirit') && budgetAmount >= 1500000) {
+      warnMsg = '⚠ 本案金額已達或逾 150 萬元公告金額，請退回步驟1重選「公開招標」。';
+    } else if (method === 'open' && budgetAmount < 1500000) {
+      warnMsg = '⚠ 本案金額未達 150 萬元公告金額，通常不需採公開招標，請確認是否選錯路線。';
+    } else if (method === 'small' && budgetAmount >= 100000) {
+      warnMsg = '💡 本案金額接近 15 萬元上限，請確認含後續擴充及同類採購總額後仍未達 15 萬元。';
+    }
+  }
+  if (warnMsg) {
+    warn.textContent = warnMsg;
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
+
+  checkReady();
+}
+
+function formatMoney(n) {
+  if (n >= 100000000) return (n/100000000).toFixed(1).replace(/\.0$/,'') + ' 億元';
+  if (n >= 10000000)  return (n/10000000).toFixed(1).replace(/\.0$/,'') + ' 千萬元';
+  if (n >= 10000)     return (n/10000).toFixed(1).replace(/\.0$/,'') + ' 萬元';
+  return n.toLocaleString() + ' 元';
 }
 
 // ── 流程資料產生 ──
 function getPhases() {
   const s = schoolName || '○○國民小學';
+  const pn = projectName || '本採購案';
+  const ba = budgetAmount > 0 ? `新臺幣 ${budgetAmount.toLocaleString()} 元` : '（金額待確認）';
   const m = selectedMethod;
   const t = selectedType;
   const yd = new Date().getFullYear()-1911; // 民國年
@@ -2192,6 +2267,8 @@ function getPhases() {
 
 // ── 啟動流程 ──
 function startFlow() {
+  projectName = (document.getElementById('projectName').value || '').trim();
+  budgetAmount = parseFloat(document.getElementById('budgetAmount').value) || 0;
   const phases = getPhases();
   currentPhases = phases;
   checked = {};
@@ -2662,7 +2739,7 @@ function saveCase() {
 
   const caseData = {
     id, name,
-    method: selectedMethod, type: selectedType, school: schoolName,
+    method: selectedMethod, type: selectedType, school: schoolName, project: projectName, budget: budgetAmount,
     phase: currentPhase, checked: {...checked},
     total, done, savedAt: new Date().toISOString()
   };
@@ -2689,6 +2766,10 @@ function loadCase(id) {
   selectedMethod = c.method;
   selectedType = c.type;
   schoolName = c.school || '';
+  projectName = c.project || '';
+  budgetAmount = c.budget || 0;
+  if (document.getElementById('projectName')) document.getElementById('projectName').value = projectName;
+  if (document.getElementById('budgetAmount')) document.getElementById('budgetAmount').value = budgetAmount || '';
   currentPhase = c.phase || 0;
   checked = {...c.checked};
   currentCaseId = id;
@@ -2727,6 +2808,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function resetAll() {
   selectedMethod = null; selectedType = null;
+  projectName = ''; budgetAmount = 0;
+  if (document.getElementById('projectName')) document.getElementById('projectName').value = '';
+  if (document.getElementById('budgetAmount')) document.getElementById('budgetAmount').value = '';
+  if (document.getElementById('budgetDisplay')) document.getElementById('budgetDisplay').textContent = '';
+  if (document.getElementById('budgetWarning')) document.getElementById('budgetWarning').style.display = 'none';
   checked = {}; currentPhase = 0;
   document.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('startBtn').disabled = true;
