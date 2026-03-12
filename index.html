@@ -744,6 +744,86 @@ header {
 }
 .tag-miss-wrap { display: inline-block; }
 
+.award-card {
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 16px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  min-width: 160px;
+  flex: 1;
+}
+.award-card:hover { border-color: var(--info); }
+.award-card.selected { border-color: var(--info); background: var(--info-bg); }
+.award-card-label { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.award-card.selected .award-card-label { color: var(--info); }
+.award-card-desc { font-size: 0.75rem; color: var(--ink-light); line-height: 1.5; }
+/* ── 簽呈撰寫要素清單 ── */
+.sign-elements-btn {
+  margin: 12px 16px 12px;
+  background: linear-gradient(135deg, #7a6020, #b5870a);
+  border: none;
+  color: #fff;
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.15s;
+  width: calc(100% - 32px);
+  box-shadow: 0 2px 8px rgba(122,96,32,0.25);
+  letter-spacing: 0.03em;
+}
+.sign-elements-btn:hover {
+  background: linear-gradient(135deg, #5a4510, #9a6e08);
+  box-shadow: 0 4px 14px rgba(122,96,32,0.35);
+  transform: translateY(-1px);
+}
+.sign-elements-wrap {
+  display: none;
+  margin: 0 16px 16px;
+  border: 1.5px solid #e8d87a;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.sign-elements-wrap.open { display: block; }
+.sign-elements-header {
+  background: linear-gradient(90deg, #7a6020, #9a7b2f);
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.sign-elements-body { padding: 12px 14px; background: #fffdf5; }
+.sign-el-section { margin-bottom: 12px; }
+.sign-el-section:last-child { margin-bottom: 0; }
+.sign-el-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.sign-el-item {
+  font-size: 0.8rem;
+  color: var(--ink);
+  line-height: 1.7;
+  padding: 4px 0;
+  border-bottom: 1px dashed #e8d87a;
+  display: flex;
+  gap: 8px;
+}
+.sign-el-item:last-child { border-bottom: none; }
+.sign-el-num { color: var(--gold); font-weight: 700; min-width: 20px; }
+.sign-el-warn { background: var(--warn-bg); border-left: 3px solid var(--warn); border-radius: 4px; padding: 6px 10px; margin-top: 6px; font-size: 0.78rem; color: #7a3500; line-height: 1.6; }
 /* ── 簽呈提醒區塊 ── */
 .sign-alert {
   background: #fff8e8;
@@ -1174,6 +1254,31 @@ header {
         <div class="opt-label">🔒 限制性招標（含議價）</div>
         <div class="opt-range">符合採購法第22條第1項各款</div>
         <div class="opt-law">採購法第22條第1項各款</div>
+      </div>
+    </div>
+
+    <!-- 決標方式（公開招標專屬） -->
+    <div id="awardSection" style="display:none; margin-top:16px; padding:14px 16px; background:var(--info-bg); border:1.5px solid #a0c4e0; border-radius:10px;">
+      <div style="font-size:0.8rem; font-weight:700; color:var(--info); margin-bottom:10px;">📋 請選擇本案決標方式</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="award-card" id="award_lowest" onclick="selectAward('lowest')">
+          <div class="award-card-label">🏷 最低標</div>
+          <div class="award-card-desc">以最低價格決標，一般財物、工程採購適用</div>
+        </div>
+        <div class="award-card" id="award_best" onclick="selectAward('best')">
+          <div class="award-card-label">⭐ 最有利標／準用最有利標</div>
+          <div class="award-card-desc">需成立評選委員會，比企劃書品質而非單純比價格</div>
+        </div>
+      </div>
+      <div id="awardRedirect" style="display:none; margin-top:12px; padding:12px 14px; background:#fff4e8; border:1.5px solid #f59e0b; border-radius:8px; font-size:0.82rem; color:#7a3500; line-height:1.8;">
+        ⚠ <strong>本案須使用「重大採購評選精靈」</strong><br>
+        <strong>適用最有利標</strong>（採購法第52條第1項第3款）屬公開招標，須報教育局核准。<br>
+        <strong>準用最有利標</strong>（採購法第22條第1項第9-11款）法律上屬限制性招標，校長核准即可。<br>
+        兩者均需成立採購評選委員會，程序較複雜，請使用專屬工具辦理。<br>
+        <a href="best-value-wizard.html" target="_blank"
+           style="display:inline-block; margin-top:8px; background:#b5390a; color:#fff; padding:7px 18px; border-radius:6px; font-weight:700; text-decoration:none; font-size:0.82rem;">
+          → 前往重大採購評選精靈
+        </a>
       </div>
     </div>
 
@@ -1637,6 +1742,129 @@ function findLawKey(text) {
   return 'law_49';
 }
 
+
+// ── 簽呈撰寫要素資料（依簽呈卡片 title 對應）──
+const SIGN_ELEMENTS = {
+
+  '採購需求簽呈': {
+    subject: '擬辦理本校「{pn}」小額採購案，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}，未達 15 萬元小額採購上限。' },
+      { label:'說明二', text:'依中央機關未達公告金額採購招標辦法第4條規定，得不經公告程序，逕洽廠商採購。' },
+      { label:'說明三', text:'經確認本案已含後續擴充等總額，無意圖規避採購法分批辦理之情形（採購法第14條及施行細則第13條）。' },
+      { label:'擬辦', text:'擬奉 鈞長核准後，由總務處逕洽廠商辦理採購事宜。' },
+    ],
+    warns: [],
+  },
+
+  '採購計畫簽呈（取最有利標精神）': {
+    subject: '擬辦理本校「{pn}」採購案，採公開取得3家以上廠商書面報價或企劃書，取最有利標精神擇符合需要者辦理，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。' },
+      { label:'說明二', text:'擬依中央機關未達公告金額採購招標辦法第2條第1項第3款辦理。' },
+      { label:'說明三（💡備案防呆）', text:'屆時如公告結果未能取得3家以上廠商之書面報價或企劃書，擬請 鈞長依同辦法第3條規定，准予當場改採限制性招標。' },
+      { label:'說明四（💡監辦防呆）', text:'本校未設政風單位，擬依機關主會計及有關單位會同監辦採購辦法第5條第1款規定，簽請 鈞長核准免由政風派員監辦，由主（會）計單位派員監辦。並擬請一併指派開標、評審及議價主持人。' },
+      { label:'擬辦', text:'擬奉 鈞長核示後，續辦上網公告及招標事宜。' },
+    ],
+    warns: ['備案條款（說明三）務必納入，否則開標當日不足3家將無法當場改採，必須另行簽核才能續辦，嚴重延誤時效。'],
+  },
+
+  '議價結果簽呈_spirit': {
+    subject: '本校「{pn}」採購案議價結果，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。已於○年○月○日完成評審，擇定○○○公司為符合需要者。' },
+      { label:'說明二', text:'本案業經完成議價程序，該廠商報價為新臺幣○○○元，在核定底價（或預算金額）以內，主持人當場宣布決標。' },
+      { label:'說明三（💡三方簽名防呆）', text:'檢附議價紀錄表，業經承辦人、得標廠商及監辦人員（會計主任）三方會同簽名。' },
+      { label:'擬辦', text:'擬奉 鈞長核閱後，依規定辦理簽約及決標公告事宜。' },
+    ],
+    warns: ['議價紀錄表三方（承辦、廠商、會計主任）均須親自簽名，缺一不可。', '決標後30日內須上eTender辦理決標公告（施行細則第84條第3項）。'],
+  },
+
+  '採購計畫簽呈_quote': {
+    subject: '擬辦理本校「{pn}」採購案，採公開取得3家以上廠商書面報價辦理，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。' },
+      { label:'說明二', text:'擬依政府採購法第49條及中央機關未達公告金額採購招標辦法第2條第1項第3款辦理公開取得書面報價。' },
+      { label:'說明三（💡備案防呆）', text:'如公告結果未能取得3家以上廠商之書面報價，擬請 鈞長依同辦法第3條規定，准予當場改採限制性招標。' },
+      { label:'說明四（💡監辦防呆）', text:'本案金額逾15萬，因本校未設政風單位，擬依機關主會計及有關單位會同監辦採購辦法第5條第1款規定，簽請核准免由政風派員監辦，由主（會）計派員監辦。' },
+      { label:'說明五（💡主持人防呆）', text:'擬請 鈞長一併指派本案開標、比價、議價及決標之主持人。' },
+      { label:'擬辦', text:'擬奉 鈞長核准後，辦理上網公告招標事宜。' },
+    ],
+    warns: ['說明三備案條款須納入，否則不足3家時無法當場改採，須另補簽呈。', '本案逾15萬才需加說明四（監辦防呆），未達15萬可刪除。'],
+  },
+
+  '比價結果簽呈': {
+    subject: '本校「{pn}」採購案比價（或議價）結果，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。' },
+      { label:'說明二', text:'本案業於○年○月○日辦理開標，經審查合格廠商計○家，隨即進行比價（或議價）程序。' },
+      { label:'說明三', text:'經比價（或議價）結果，由○○○公司以新臺幣○○○元為最低標，且在核定底價以內，主持人當場宣布決標。' },
+      { label:'說明四（💡附件防呆）', text:'檢附比價（或議價）紀錄表（已含主持人、廠商及監辦人員簽名）及底價核定表（已開封）。' },
+      { label:'擬辦', text:'擬奉 鈞長核閱後，辦理後續簽約及履約事宜。' },
+    ],
+    warns: ['底價核定表開封後，應與比價結果一併附於本簽呈。', '若廠商均超底價而洽減，洽減過程須記錄於比價紀錄表。'],
+  },
+
+  '採購計畫簽呈_open': {
+    subject: '擬辦理本校「{pn}」採購案，採公開招標方式辦理，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}，屬公告金額以上之採購。' },
+      { label:'說明二', text:'擬依政府採購法第18條及第19條規定，採公開招標方式辦理，並依同法第52條第1項第1款採最低標決標。' },
+      { label:'說明三（💡監辦防呆）', text:'本校未設政風單位，擬依機關主會計及有關單位會同監辦採購辦法第5條第1款規定，簽請 鈞長核准免由政風派員監辦，由主（會）計單位會同監辦。' },
+      { label:'說明四（💡主持人防呆）', text:'擬請 鈞長一併指派本案開標、比價、議價及決標之主持人。' },
+      { label:'擬辦', text:'擬奉 鈞長核准後，續辦招標文件擬定及上網公告事宜。' },
+    ],
+    warns: ['本案達150萬公告金額，開標、決標、驗收均須通知會計主任擔任監辦，建議在本簽呈核定時即確認會計主任可出席日期。'],
+  },
+
+  '底價核定簽呈（保密文件）': {
+    subject: '（密件）陳核本校「{pn}」採購案底價，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。' },
+      { label:'說明二', text:'依政府採購法第46條及同法施行細則第53條規定，底價應由承辦採購單位簽報機關首長或其授權人員核定。' },
+      { label:'說明三', text:'檢陳本案「底價預估金額分析表」及「底價核定單」，敬請核定。' },
+      { label:'擬辦', text:'擬請 鈞長核定底價後，由承辦單位予以彌封，以利後續開標作業。' },
+    ],
+    warns: ['底價核定後應立即彌封，開標前嚴禁洩漏（採購法第34條），違者可能構成採購弊端。', '底價查訪資料應具體充分，不可流於形式（114年稽核第5大缺失）。', '本簽呈屬保密文件，公文封面應加蓋「密件」戳章。'],
+  },
+
+  '決標結果簽呈': {
+    subject: '本校「{pn}」公開招標決標結果，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。業於○年○月○日辦理開標。' },
+      { label:'說明二', text:'經審標合格之廠商共○家，由○○○廠商以新臺幣○○○元標價最低，且在核定底價以內，經主持人當場宣布決標。' },
+      { label:'說明三（💡附件防呆）', text:'檢陳開標/決標紀錄表（已含主持人及會同監辦之會計主任簽名）與相關開標附件。' },
+      { label:'擬辦', text:'擬奉 鈞長核閱後，依規定於30日內辦理決標公告及後續簽約事宜。' },
+    ],
+    warns: ['決標後30日內須上eTender辦理決標公告（施行細則第84條第3項）。', '開標紀錄表上，監辦人員（會計主任）欄位不得空白。'],
+  },
+
+  '限制性招標核准簽呈': {
+    subject: '擬辦理本校「{pn}」採購案，採限制性招標方式辦理，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。' },
+      { label:'說明二（💡法定款次防呆）', text:'本案因【請填寫具體客觀事實，如：原有採購之後續維修需由原供應商處理，無其他合適替代廠商】，符合政府採購法第22條第1項第【 】款規定。' },
+      { label:'說明三', text:'擬請 鈞長核准依上開法規，逕洽○○○廠商辦理議價。' },
+      { label:'說明四（💡監辦防呆）', text:'本校未設政風單位，擬依機關主會計及有關單位會同監辦採購辦法第5條第1款，簽請准予免由政風派員監辦。並請 鈞長一併指派議價主持人。' },
+      { label:'擬辦', text:'擬奉 鈞長核准後，函請廠商提供報價單，並續辦底價核定與議價事宜。' },
+    ],
+    warns: ['說明二「法定款次」必須具體填寫符合第幾款及具體理由，不可僅寫「業務需要」或「時間緊迫」，此為稽核及廠商申訴最常抓的缺失。'],
+  },
+
+  '議價結果簽呈_restricted': {
+    subject: '本校「{pn}」限制性招標議價結果，簽請核示。',
+    items: [
+      { label:'說明一', text:'本案預算金額為新臺幣 {ba}。前已奉准依政府採購法第22條第1項第【 】款辦理。' },
+      { label:'說明二', text:'案經依施行細則第54條第3項參考廠商報價單訂定底價，並於○年○月○日辦理議價程序。' },
+      { label:'說明三', text:'經議價結果，廠商願以新臺幣○○○元承攬，在核定底價以內，經主持人當場宣布決標。' },
+      { label:'說明四（💡附件防呆）', text:'檢附議價紀錄表（業經承辦人、廠商及監辦人員三方簽名）及底價核定單。' },
+      { label:'擬辦', text:'擬奉 鈞長核閱後，依規定辦理決標公告及簽約履約事宜。' },
+    ],
+    warns: ['議價紀錄表三方（承辦、廠商、會計主任）均須親自簽名，缺一不可。', '決標後30日內須上eTender辦理決標公告（施行細則第84條第3項）。'],
+  },
+
+};
+
 let selectedMethod = null;
 let selectedType = null;
 let selectedAward = null;  // 決標方式：lowest / spirit / quasi / full
@@ -1654,7 +1882,12 @@ function selectMethod(el) {
   // 公開招標才顯示決標方式
   const awardSection = document.getElementById('awardSection');
   if (awardSection) awardSection.style.display = selectedMethod === 'open' ? 'block' : 'none';
-  if (selectedMethod !== 'open') selectedAward = null;
+  if (selectedMethod !== 'open') {
+    selectedAward = null;
+    document.querySelectorAll('.award-card').forEach(c => c.classList.remove('selected'));
+    const rd = document.getElementById('awardRedirect');
+    if (rd) rd.style.display = 'none';
+  }
   checkReady();
 }
 function selectType(el) {
@@ -1663,15 +1896,19 @@ function selectType(el) {
   selectedType = el.dataset.type;
   checkReady();
 }
-function selectAward(el) {
-  document.querySelectorAll('#awardGrid .opt-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedAward = el.dataset.award;
+function selectAward(val) {
+  selectedAward = val;
+  document.querySelectorAll('.award-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('award_' + val);
+  if (card) card.classList.add('selected');
+  const rd = document.getElementById('awardRedirect');
+  if (rd) rd.style.display = val === 'best' ? 'block' : 'none';
   checkReady();
 }
 
 function checkReady() {
-  const ready = selectedMethod && selectedType && projectName.trim() && budgetAmount > 0;
+  const awardOk = selectedMethod !== 'open' || selectedAward === 'lowest';
+  const ready = selectedMethod && selectedType && projectName.trim() && budgetAmount > 0 && awardOk;
   document.getElementById('startBtn').disabled = !ready;
 }
 
@@ -1738,7 +1975,7 @@ function getPhases() {
         id:'p1', title:'採購前準備', desc:'小額採購程序相對簡便，但仍須留存紀錄備查。',
         notices:[{type:'info', text:'小額採購（未達15萬元）得不訂底價，不需上政府電子採購網公告。但「意圖規避」而化整為零分批採購屬違法行為，請務必確認總金額。（採購法第49條）'}],
         signCard:{
-          title:'採購需求簽呈',
+          title:'採購需求簽呈', elemKey:'採購需求簽呈',
           timing:'詢價前，取得授權才能進行後續作業',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['採購規格說明（品名、數量、規格）','預算科目及可用餘額確認單（會計簽章）'],
@@ -1806,7 +2043,7 @@ function getPhases() {
           {type:'warn', text:'【監辦規定】本方式金額逾15萬元，依《政府採購法》第13條第2項授權各地方政府訂定之未達公告金額採購監辦辦法（如：新竹市未達公告金額採購監辦辦法），逾公告金額十分之一（15萬元）之採購，開標、議價、決標及驗收時，均須通知主(會)計單位派員監辦。若本校未設政風單位，應於採購計畫簽呈中敘明「本校未設政風單位，擬請校長核准免由政風派員監辦」，會計主任監辦即可（機關主會計及有關單位會同監辦採購辦法第5條第1款）。'},
         ],
         signCard:{
-          title:'採購計畫簽呈（取最有利標精神）',
+          title:'採購計畫簽呈（取最有利標精神）', elemKey:'採購計畫簽呈（取最有利標精神）',
           timing:'公告前，取得授權並確認評審項目',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['採購規格說明書（含評審項目、配分及權重）','預算科目及可用餘額（會計確認）','擬採取最有利標精神之說明'],
@@ -1881,7 +2118,7 @@ function getPhases() {
           {type:'warn', text:'議價時不應強制廠商大幅減價，主要目的是確認履約細節（如工作內容、時程、人員配置）；若廠商報價合理且在預算內，可照價決標。'},
         ],
         signCard:{
-          title:'議價結果簽呈',
+          title:'議價結果簽呈', elemKey:'議價結果簽呈_spirit',
           timing:'議價完成後、通知得標廠商前',
           route:['承辦（總務主任）','會計主任（監辦＋會辦）','校長（核定）'],
           attachments:['評審總表（含各廠商評分）','底價核定表（開封後附上）','議價紀錄表（含監辦人員簽名欄）','得標廠商報價單及企劃書'],
@@ -1940,7 +2177,7 @@ function getPhases() {
           {type:'warn', text:'注意：分批辦理以規避公告金額者違法。若已知後續有類案採購且有預算，應合計認定（施行細則第6條；113年錯誤行為態樣增列）。'},
         ],
         signCard:{
-          title:'採購計畫簽呈',
+          title:'採購計畫簽呈', elemKey:'採購計畫簽呈_quote',
           timing:'詢報價公告前，取得授權才能啟動後續流程',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['採購規格說明書','預算科目及可用餘額（會計確認）','預計詢報價公告方式說明'],
@@ -1974,7 +2211,7 @@ function getPhases() {
       {
         id:'p3', title:'比價與決定', desc:'',
         signCard:{
-          title:'比價結果簽呈',
+          title:'比價結果簽呈', elemKey:'比價結果簽呈',
           timing:'決定廠商後、通知廠商前，須完成簽核',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['比價紀錄表（含3家廠商報價單）','底價核定表（已密封開封）','決定廠商說明'],
@@ -2027,7 +2264,7 @@ function getPhases() {
           {type:'warn', text:'注意：分批辦理以規避公告金額屬違法行為；招標文件刊登後若需修改，須重新公告並延長等標期。'},
         ],
         signCard:{
-          title:'採購計畫簽呈',
+          title:'採購計畫簽呈', elemKey:'採購計畫簽呈_open',
           timing:'正式公告前，所有準備作業的授權依據',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['採購規格說明書草稿','預算科目及可用餘額（會計確認）','主辦採購人員及監辦人員名單'],
@@ -2058,7 +2295,7 @@ function getPhases() {
         id:'p2', title:'規格書與底價', desc:'規格書品質決定招標品質，底價須依法保密。',
         notices:[{type:'warn', text:'規格書一旦上網公告後若需修改，須重新公告並延長等標期，請確認後再刊登。底價核定後密封，開標前嚴禁洩漏。'}],
         signCard:{
-          title:'底價核定簽呈（保密文件）',
+          title:'底價核定簽呈（保密文件）', elemKey:'底價核定簽呈（保密文件）',
           timing:'底價查訪完成後、公告前完成簽核並密封',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['底價核定表（核定後密封）','底價查訪紀錄（至少3家廠商詢價）','工程會價格資料庫查詢結果（如有）'],
@@ -2098,7 +2335,7 @@ function getPhases() {
         id:'p4', title:'開標與決標', desc:'開標程序須依法辦理，程序瑕疵可能導致廢標或爭議。',
         notices:[{type:'warn', text:`現行規定：須有3家以上合格廠商投標方可開標決標（採購法第48條）。⚠ 注意：採購法修正草案擬取消此限制，草案尚未通過，現行規定仍適用。`}],
         signCard:{
-          title:'決標結果簽呈',
+          title:'決標結果簽呈', elemKey:'決標結果簽呈',
           timing:'開標決標完成後、通知得標廠商前，完成簽核',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['開標/決標紀錄表（三方簽名）','廠商投標文件（含資格審查結果）','底價核定表（開封後與決標結果一併附上）'],
@@ -2191,7 +2428,7 @@ function getPhases() {
           {type:'law', text:'採購法第22條第1項共列16款適用情形，常見如：流標後重辦（第1款）、專屬權利/獨家供應（第2款）、緊急事故（第3款）、後續維修（第4款）。'},
         ],
         signCard:{
-          title:'限制性招標核准簽呈',
+          title:'限制性招標核准簽呈', elemKey:'限制性招標核准簽呈',
           timing:'所有後續作業前，必須先取得校長核准',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['法定情形說明書（具體說明符合第幾款及理由）','廠商獨家供應或資格說明文件（如有）','預算科目及可用餘額（會計確認）'],
@@ -2214,7 +2451,7 @@ function getPhases() {
         id:'p2', title:'議價作業', desc:'',
         notices:[{type:'info', text:'議價時應以市場合理價格為基準，不得因已確定廠商而放棄議價，應留存完整議價紀錄。'}],
         signCard:{
-          title:'議價結果簽呈',
+          title:'議價結果簽呈', elemKey:'議價結果簽呈_restricted',
           timing:'議價完成後、通知廠商前，完成簽核',
           route:['承辦（總務主任）','會計主任（會辦）','校長（核定）'],
           attachments:['議價紀錄表（三方簽名）','底價核定表（開封後附上）','廠商報價單'],
@@ -2343,6 +2580,33 @@ function renderFlow(phases) {
       const isChk = checked[k] ? 'checked' : '';
       return `<div class="sign-check-row"><input type="checkbox" id="${k}" ${isChk} onchange="toggleSignCard('${k}')"><label for="${k}">${n}</label></div>`;
     }).join('');
+    // 撰寫要素清單
+    const elemKey = sc.elemKey || '';
+    const elemData = elemKey ? SIGN_ELEMENTS[elemKey] : null;
+    let elemHtml = '';
+    if (elemData) {
+      const pnVal = projectName || '（本採購案）';
+      const baVal = budgetAmount > 0 ? `新臺幣 ${budgetAmount.toLocaleString()} 元` : '（請填入金額）';
+      const replace = s => s.replace(/\{pn\}/g, pnVal).replace(/\{ba\}/g, baVal);
+      const subjHtml = `<div class="sign-el-section">
+        <div class="sign-el-label">📌 主旨</div>
+        <div class="sign-el-item"><div>${replace(elemData.subject)}</div></div>
+      </div>`;
+      const itemsHtml = `<div class="sign-el-section">
+        <div class="sign-el-label">📝 說明與擬辦</div>
+        ${elemData.items.map(it=>`<div class="sign-el-item"><div class="sign-el-num">${it.label}</div><div>${replace(it.text)}</div></div>`).join('')}
+      </div>`;
+      const warnsHtml = elemData.warns.length ? `<div class="sign-el-section">
+        ${elemData.warns.map(w=>`<div class="sign-el-warn">⚠ ${w}</div>`).join('')}
+      </div>` : '';
+      const elId = `elem_${currentPhase}`;
+      elemHtml = `<button class="sign-elements-btn" onclick="toggleElem('${elId}')">📝 展開簽呈撰寫要素清單</button>
+      <div class="sign-elements-wrap" id="${elId}">
+        <div class="sign-elements-header">✍️ 簽呈撰寫要素｜請對照各欄位填入公文系統</div>
+        <div class="sign-elements-body">${subjHtml}${itemsHtml}${warnsHtml}</div>
+      </div>`;
+    }
+
     html += `<div class="sign-card">
       <div class="sign-card-header">📋 本階段需要上簽呈｜${sc.title}</div>
       <div class="sign-card-body">
@@ -2363,6 +2627,7 @@ function renderFlow(phases) {
           <div class="sign-checklist">${noteHtml}</div>
         </div>` : ''}
       </div>
+      ${elemHtml}
     </div>`;
   }
 
@@ -2470,6 +2735,14 @@ function toggleItem(key, phases) {
   checked[key] = !checked[key];
   updateProgress(phases);
   renderFlow(phases);
+}
+
+function toggleElem(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const btn = el.previousElementSibling;
+  const isOpen = el.classList.toggle('open');
+  if (btn) btn.textContent = (isOpen ? '▲ 收合' : '📝 展開') + '簽呈撰寫要素清單';
 }
 
 function toggleSignCard(key) {
@@ -2808,7 +3081,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function resetAll() {
   selectedMethod = null; selectedType = null;
-  projectName = ''; budgetAmount = 0;
+  projectName = ''; budgetAmount = 0; selectedAward = null;
   if (document.getElementById('projectName')) document.getElementById('projectName').value = '';
   if (document.getElementById('budgetAmount')) document.getElementById('budgetAmount').value = '';
   if (document.getElementById('budgetDisplay')) document.getElementById('budgetDisplay').textContent = '';
