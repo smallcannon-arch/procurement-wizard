@@ -730,7 +730,9 @@ header {
 .miss-tooltip {
   display: none;
   position: absolute;
-  z-index: 200;
+  z-index: 9999;
+  bottom: calc(100% + 8px);
+  left: 0;
   background: #1c1c2e;
   color: white;
   font-size: 0.73rem;
@@ -745,10 +747,10 @@ header {
 .miss-tooltip::before {
   content: '';
   position: absolute;
-  top: -6px; left: 14px;
+  bottom: -6px; left: 14px;
   border: 6px solid transparent;
-  border-bottom-color: #1c1c2e;
-  border-top: none;
+  border-top-color: #1c1c2e;
+  border-bottom: none;
 }
 .tag-miss-wrap { position: relative; display: inline-block; }
 .tag-miss-wrap:hover .miss-tooltip { display: block; }
