@@ -727,33 +727,22 @@ header {
 /* ── 易漏點標示 ── */
 .tag-miss { background: #fde8e8; color: #9b1c1c; cursor: pointer; transition: all 0.15s; border: 1px solid #fca5a5; }
 .tag-miss:hover { background: #9b1c1c; color: white; }
-.miss-tooltip {
+#global-tooltip {
   display: none;
-  position: absolute;
-  z-index: 9999;
-  bottom: calc(100% + 8px);
-  left: 0;
+  position: fixed;
+  z-index: 99999;
   background: #1c1c2e;
   color: white;
   font-size: 0.73rem;
   line-height: 1.6;
   padding: 10px 14px;
   border-radius: 8px;
-  max-width: 280px;
+  max-width: 260px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   white-space: normal;
   pointer-events: none;
 }
-.miss-tooltip::before {
-  content: '';
-  position: absolute;
-  bottom: -6px; left: 14px;
-  border: 6px solid transparent;
-  border-top-color: #1c1c2e;
-  border-bottom: none;
-}
-.tag-miss-wrap { position: relative; display: inline-block; }
-.tag-miss-wrap:hover .miss-tooltip { display: block; }
+.tag-miss-wrap { display: inline-block; }
 
 /* ── 簽呈提醒區塊 ── */
 .sign-alert {
@@ -1207,25 +1196,6 @@ header {
       </div>
     </div>
 
-    <div class="divider"></div>
-
-    <div class="step-title"><div class="step-num">3</div> 填入學校名稱</div>
-    <div class="step-subtitle">將顯示於簽呈範本中，可隨時修改</div>
-    <div style="padding-left:38px; margin-top:10px;">
-      <input type="text" id="schoolName" placeholder="例：○○縣市○○國民小學" style="
-        width:320px; max-width:100%;
-        padding: 10px 14px;
-        border: 1.5px solid var(--border);
-        border-radius: 8px;
-        font-family: 'Noto Sans TC', sans-serif;
-        font-size: 0.88rem;
-        color: var(--ink);
-        background: white;
-        outline: none;
-        transition: border-color 0.2s;
-      " oninput="updateSchoolName()" onfocus="this.style.borderColor='var(--ink)'" onblur="this.style.borderColor='var(--border)'">
-    </div>
-
     <div class="start-btn-wrap" style="margin-top:28px;">
       <button class="start-btn" id="startBtn" onclick="startFlow()" disabled>產生採購流程 →</button>
       <div style="font-size:0.75rem; color:var(--ink-light); margin-top:8px; padding-left:0;">請先完成步驟 1 與步驟 2</div>
@@ -1670,9 +1640,7 @@ function selectAward(el) {
   selectedAward = el.dataset.award;
   checkReady();
 }
-function updateSchoolName() {
-  schoolName = document.getElementById('schoolName').value.trim();
-}
+
 function checkReady() {
   const ready = selectedMethod && selectedType;
   document.getElementById('startBtn').disabled = !ready;
@@ -2361,7 +2329,7 @@ function renderFlow(phases) {
 
       // 易漏點標籤
       const missTag = item.miss
-        ? `<span class="tag-miss-wrap"><span class="tag tag-miss" onclick="event.stopPropagation()">⚠ 易漏</span><div class="miss-tooltip">${item.miss}</div></span>`
+        ? `<span class="tag-miss-wrap" data-tip="${item.miss.replace(/`/g,'\'')}"><span class="tag tag-miss" onclick="event.stopPropagation()">⚠ 易漏</span></span>`
         : '';
 
       html += `<div class="check-item ${cls}" onclick="toggleItem('${key}', ${JSON.stringify(phases).replace(/"/g,'&quot;')})">
@@ -2758,10 +2726,9 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 function resetAll() {
-  selectedMethod = null; selectedType = null; schoolName = '';
+  selectedMethod = null; selectedType = null;
   checked = {}; currentPhase = 0;
   document.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('schoolName').value = '';
   document.getElementById('startBtn').disabled = true;
   document.getElementById('completeScreen').style.display = 'none';
   document.getElementById('flowScreen').style.display = 'none';
@@ -2771,5 +2738,6 @@ function resetAll() {
   window.scrollTo({top:0});
 }
 </script>
+<div id="global-tooltip"></div>
 </body>
 </html>
