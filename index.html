@@ -1461,10 +1461,11 @@ header {
     <div class="wizard-q-label">問題 2 / 3</div>
     <div class="wizard-q-title">預計花多少錢？</div>
     <div class="wizard-q-sub">請填入含稅總金額。若有分批採購，請填入所有批次的合計總額。</div>
-    <div class="wizard-amount-wrap">
+<div class="wizard-amount-wrap">
       <input type="number" class="wizard-amount-input" id="wizardAmount"
   placeholder="0" min="0" oninput="onWizardAmountLive()" onkeydown="if(event.key==='Enter')onWizardAmount()">
       <span style="font-size:0.88rem;color:var(--ink-light)">元</span>
+      <button onclick="onWizardAmount()" style="padding:9px 18px;background:var(--ink);color:white;border:none;border-radius:8px;font-family:'Noto Sans TC',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='var(--ink)'">確認 →</button>
       <span class="wizard-amount-hint" id="wizardAmountHint"></span>
     </div>
     <div class="wizard-amount-band" id="wizardAmountBand"></div>
