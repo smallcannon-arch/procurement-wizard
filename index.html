@@ -1414,8 +1414,120 @@ header {
 <!-- ── 主內容 ── -->
 <div class="main">
 
+<!-- ══ 情境問答入口 ══ -->
+<div id="wizardScreen" class="wizard-screen">
+  <div class="wizard-hero">
+    <h2>這次要辦什麼採購？</h2>
+    <p>回答幾個簡單問題，系統自動判斷採購方式並產生流程。</p>
+  </div>
+
+  <div class="wizard-progress">
+    <div class="wizard-progress-dot active" id="wdot0"></div>
+    <div class="wizard-progress-dot" id="wdot1"></div>
+    <div class="wizard-progress-dot" id="wdot2"></div>
+  </div>
+
+  <!-- 第1題：採購標的 -->
+  <div class="wizard-q" id="wq1">
+    <div class="wizard-q-label">問題 1 / 3</div>
+    <div class="wizard-q-title">這次採購的是什麼？</div>
+    <div class="wizard-opts">
+      <button class="wizard-opt" onclick="selectWizard('type','goods',this)">
+        <span class="wizard-opt-icon">📦</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">物品或設備</div>
+          <div class="wizard-opt-desc">桌椅、電腦、投影機、教材教具、兒童節禮物等</div>
+        </div>
+      </button>
+      <button class="wizard-opt" onclick="selectWizard('type','service',this)">
+        <span class="wizard-opt-icon">🛠</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">請廠商提供服務</div>
+          <div class="wizard-opt-desc">午餐、校外教學、清潔、保全、社團師資、活動辦理等</div>
+        </div>
+      </button>
+      <button class="wizard-opt" onclick="selectWizard('type','work',this)">
+        <span class="wizard-opt-icon">🏗</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">工程修繕</div>
+          <div class="wizard-opt-desc">修繕、新建、改建、拆除、裝修等</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 第2題：金額 -->
+  <div class="wizard-q" id="wq2" style="display:none">
+    <div class="wizard-q-label">問題 2 / 3</div>
+    <div class="wizard-q-title">預計花多少錢？</div>
+    <div class="wizard-q-sub">請填入含稅總金額。若有分批採購，請填入所有批次的合計總額。</div>
+    <div class="wizard-amount-wrap">
+      <input type="number" class="wizard-amount-input" id="wizardAmount"
+        placeholder="0" min="0" oninput="onWizardAmount()">
+      <span style="font-size:0.88rem;color:var(--ink-light)">元</span>
+      <span class="wizard-amount-hint" id="wizardAmountHint"></span>
+    </div>
+    <div class="wizard-amount-band" id="wizardAmountBand"></div>
+  </div>
+
+  <!-- 第3題：品質 or 價格 -->
+  <div class="wizard-q" id="wq3" style="display:none">
+    <div class="wizard-q-label">問題 3 / 3</div>
+    <div class="wizard-q-title">這次除了看價格，也想比較廠商的品質或企劃內容嗎？</div>
+    <div class="wizard-q-sub">例如：營養午餐菜色與衛生管理、畢旅或校外教學行程規劃、具特殊規格的視聽或資訊設備</div>
+    <div class="wizard-opts">
+      <button class="wizard-opt" onclick="selectWizard('quality','yes',this)">
+        <span class="wizard-opt-icon">⭐</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">是，想綜合比較品質或企劃內容</div>
+          <div class="wizard-opt-desc">除了價格，也要評比廠商提出的服務計畫或產品品質</div>
+        </div>
+      </button>
+      <button class="wizard-opt" onclick="selectWizard('quality','no',this)">
+        <span class="wizard-opt-icon">🏷</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">否，單純比價格</div>
+          <div class="wizard-opt-desc">符合規格就好，選最低價的廠商</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 第4-1題：特殊情形 -->
+  <div class="wizard-q" id="wq4a" style="display:none">
+    <div class="wizard-q-label">問題 3 / 3</div>
+    <div class="wizard-q-title">是否符合以下特殊情形之一？</div>
+    <div class="wizard-q-sub">前次已流廢標、原有採購的後續擴充或維修、獨家專利供應、緊急事故、邀請特定藝文表演團體、向庇護工場採購</div>
+    <div class="wizard-opts">
+      <button class="wizard-opt" onclick="selectWizard('special','yes',this)">
+        <span class="wizard-opt-icon">✅</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">符合，屬於上述情形之一</div>
+          <div class="wizard-opt-desc">→ 限制性招標（採購法第22條）</div>
+        </div>
+      </button>
+      <button class="wizard-opt" onclick="selectWizard('special','no',this)">
+        <span class="wizard-opt-icon">➡️</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">不符合，一般採購</div>
+          <div class="wizard-opt-desc">→ 繼續下一個問題</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 第4-2題：最低標 or 比企劃書 -->
+  <div class="wizard-q" id="wq4b" style="display:none">
+    <div class="wizard-q-label">補充問題</div>
+    <div class="wizard-q-title">這次打算怎麼決定得標廠商？</div>
+    <div class="wizard-opts">
+      <button class="wizard-opt" onclick="selectWizard('award','lowest',this)">
+
   <!-- 步驟一：參數選擇 -->
-  <div class="wizard-step" id="setupScreen">
+  <div class="wizard-step" id="setupScreen" style="display:none">
+    <div style="margin-bottom:16px;">
+  <button class="back-to-setup" onclick="backToWizard()" style="border-color:var(--accent);color:var(--accent);">← 回到問答入口</button>
+</div>
     <div class="step-title"><div class="step-num">1</div> 選擇採購方式</div>
     <div class="step-subtitle">依預算金額自動對應，不確定時請先確認預算科目</div>
     <div class="option-grid col3" id="methodGrid">
@@ -1583,6 +1695,211 @@ header {
 </div>
 
 <script>
+
+// ══════════════════════════════════════════
+// 情境問答入口
+// ══════════════════════════════════════════
+let wizardType = null;
+let wizardQuality = null;
+let wizardSpecial = null;
+let wizardAward = null;
+let wizardMethodResult = null;
+let wizardAmountValue = 0;
+let wq3Shown = false;
+let wq4aShown = false;
+let wq4bShown = false;
+let resultShown = false;
+
+function selectWizard(key, val, el) {
+  el.closest('.wizard-opts').querySelectorAll('.wizard-opt')
+    .forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+
+  if (key === 'type') {
+    wizardType = val;
+    selectedType = val;
+    wq3Shown = false; wq4aShown = false; wq4bShown = false; resultShown = false;
+    wizardQuality = null; wizardSpecial = null; wizardAward = null;
+    document.getElementById('wq2').style.display = 'block';
+    document.getElementById('wdot0').classList.remove('active');
+    document.getElementById('wdot0').classList.add('done');
+    document.getElementById('wdot1').classList.add('active');
+    setTimeout(() => document.getElementById('wq2').scrollIntoView({behavior:'smooth',block:'center'}), 100);
+  }
+
+  if (key === 'quality') {
+    wizardQuality = val;
+    setTimeout(() => evalWizard(), 300);
+  }
+
+  if (key === 'special') {
+    wizardSpecial = val;
+    if (val === 'yes') {
+      setTimeout(() => evalWizard(), 300);
+    } else {
+      if (!wq4bShown) {
+        wq4bShown = true;
+        document.getElementById('wq4b').style.display = 'block';
+        setTimeout(() => document.getElementById('wq4b').scrollIntoView({behavior:'smooth',block:'center'}), 100);
+      }
+    }
+  }
+
+  if (key === 'award') {
+    wizardAward = val;
+    setTimeout(() => evalWizard(), 300);
+  }
+}
+
+function onWizardAmount() {
+  wizardAmountValue = parseFloat(document.getElementById('wizardAmount').value) || 0;
+  const hint = document.getElementById('wizardAmountHint');
+  const band = document.getElementById('wizardAmountBand');
+
+  if (wizardAmountValue <= 0) {
+    hint.textContent = '';
+    band.className = 'wizard-amount-band';
+    band.textContent = '';
+    return;
+  }
+
+  hint.textContent = '（' + formatMoney(wizardAmountValue) + '）';
+
+  if (wizardAmountValue < 150000) {
+    band.className = 'wizard-amount-band small';
+    band.textContent = '✅ 未達 15 萬元（小額採購級距）';
+    document.getElementById('wdot1').classList.remove('active');
+    document.getElementById('wdot1').classList.add('done');
+    document.getElementById('wdot2').classList.add('active');
+    if (!resultShown) { resultShown = true; setTimeout(() => evalWizard(), 600); }
+  } else if (wizardAmountValue < 1500000) {
+    band.className = 'wizard-amount-band mid';
+    band.textContent = '📋 15萬以上、未達 150 萬元';
+    document.getElementById('wdot1').classList.remove('active');
+    document.getElementById('wdot1').classList.add('done');
+    document.getElementById('wdot2').classList.add('active');
+    if (!wq3Shown) {
+      wq3Shown = true;
+      document.getElementById('wq3').style.display = 'block';
+      setTimeout(() => document.getElementById('wq3').scrollIntoView({behavior:'smooth',block:'center'}), 100);
+    }
+  } else {
+    band.className = 'wizard-amount-band large';
+    band.textContent = '📋 150 萬元以上（公告金額以上）';
+    document.getElementById('wdot1').classList.remove('active');
+    document.getElementById('wdot1').classList.add('done');
+    document.getElementById('wdot2').classList.add('active');
+    if (!wq4aShown) {
+      wq4aShown = true;
+      document.getElementById('wq4a').style.display = 'block';
+      setTimeout(() => document.getElementById('wq4a').scrollIntoView({behavior:'smooth',block:'center'}), 100);
+    }
+  }
+}
+
+function evalWizard() {
+  const amt = wizardAmountValue;
+  let method = null;
+  let methodKey = null;
+  let desc = null;
+  let isExternal = false;
+
+  if (amt < 150000) {
+    method = '🧾 小額採購';
+    methodKey = 'small';
+    desc = '未達 15 萬元，得不經公告程序逕洽廠商採購。建議取得 2～3 家書面報價備查。';
+  } else if (amt < 1500000) {
+    if (wizardQuality === 'yes') {
+      method = '⭐ 公開取得3家報價（取最有利標精神）';
+      methodKey = 'spirit';
+      desc = '依中央機關未達公告金額採購招標辦法第2條第1項第3款辦理。需公開取得3家以上書面報價及企劃書，綜合評比後議價決標。';
+    } else {
+      method = '📊 公開取得3家報價（最低標）';
+      methodKey = 'quote';
+      desc = '依採購法第49條辦理。需公開取得3家以上書面報價，以最低合理報價決標。';
+    }
+  } else {
+    if (wizardSpecial === 'yes') {
+      method = '🔒 限制性招標';
+      methodKey = 'limited';
+      desc = '符合採購法第22條第1項法定情形，得採限制性招標，逕洽廠商議價。須於簽呈中具體載明適用款次。';
+    } else if (wizardAward === 'best') {
+      method = '⭐ 適用／準用最有利標';
+      methodKey = 'best';
+      desc = '150 萬以上且需比較企劃書品質，須成立採購評選委員會。請使用重大採購評選精靈辦理。';
+      isExternal = true;
+    } else if (wizardAward === 'lowest') {
+      method = '📢 公開招標（最低標）';
+      methodKey = 'open';
+      desc = '150 萬元以上，依採購法第19條規定辦理公開招標，以最低標決標。等標期財物勞務不得少於14日，工程不得少於28日。';
+    } else {
+      return;
+    }
+  }
+
+  wizardMethodResult = methodKey;
+  budgetAmount = amt;
+
+  const result = document.getElementById('wizardResult');
+  document.getElementById('wizardResultMethod').textContent = method;
+  document.getElementById('wizardResultDesc').textContent = desc;
+
+  const btn = document.getElementById('wizardResultBtn');
+  if (isExternal) {
+    btn.textContent = '前往重大採購評選精靈 →';
+    btn.className = 'wizard-result-btn external';
+  } else {
+    btn.textContent = '產生採購流程 →';
+    btn.className = 'wizard-result-btn';
+  }
+
+  result.classList.add('show');
+  setTimeout(() => result.scrollIntoView({behavior:'smooth',block:'center'}), 100);
+}
+
+function wizardGo() {
+  if (wizardMethodResult === 'best') {
+    window.open('https://smallcannon-arch.github.io/Best-value-wizard/', '_blank');
+    return;
+  }
+
+  selectedMethod = wizardMethodResult;
+  budgetAmount = wizardAmountValue;
+
+  if (document.getElementById('budgetAmount')) {
+    document.getElementById('budgetAmount').value = wizardAmountValue;
+  }
+  if (document.getElementById('budgetDisplay')) {
+    document.getElementById('budgetDisplay').textContent =
+      wizardAmountValue > 0 ? '（' + formatMoney(wizardAmountValue) + '）' : '';
+  }
+
+  document.querySelectorAll('#methodGrid .opt-card').forEach(c => {
+    c.classList.remove('selected');
+    if (c.dataset.method === wizardMethodResult) c.classList.add('selected');
+  });
+
+  document.querySelectorAll('#typeGrid .opt-card').forEach(c => {
+    c.classList.remove('selected');
+    if (c.dataset.type === selectedType) c.classList.add('selected');
+  });
+
+  document.getElementById('wizardScreen').style.display = 'none';
+  startFlow();
+}
+
+function skipWizard() {
+  document.getElementById('wizardScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function backToWizard() {
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('wizardScreen').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
 // ── 法條資料庫 ──
 const LAW_DB = {
   'law_49': {
@@ -1911,7 +2228,8 @@ document.addEventListener('keydown', e => {
 
 function backToSetup() {
   document.getElementById('flowScreen').style.display = 'none';
-  document.getElementById('setupScreen').style.display = 'block';
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('wizardScreen').style.display = 'block';
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
@@ -3280,11 +3598,29 @@ function resetAll() {
   document.querySelectorAll('.opt-card').forEach(c => c.classList.remove('selected'));
   document.getElementById('startBtn').disabled = true;
   document.getElementById('completeScreen').style.display = 'none';
-  document.getElementById('flowScreen').style.display = 'none';
-  document.getElementById('setupScreen').style.display = 'block';
-  document.getElementById('progressFill').style.width = '0%';
-  document.getElementById('progressLabel').textContent = '整體完成度 0%';
-  window.scrollTo({top:0});
+document.getElementById('flowScreen').style.display = 'none';
+document.getElementById('setupScreen').style.display = 'none';
+document.getElementById('wizardScreen').style.display = 'block';
+// 重置問答 UI
+wizardType = null; wizardQuality = null; wizardSpecial = null;
+wizardAward = null; wizardMethodResult = null; wizardAmountValue = 0;
+wq3Shown = false; wq4aShown = false; wq4bShown = false; resultShown = false;
+if (document.getElementById('wizardAmount')) document.getElementById('wizardAmount').value = '';
+if (document.getElementById('wizardAmountHint')) document.getElementById('wizardAmountHint').textContent = '';
+if (document.getElementById('wizardAmountBand')) document.getElementById('wizardAmountBand').className = 'wizard-amount-band';
+['wq2','wq3','wq4a','wq4b'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+});
+document.getElementById('wizardResult').classList.remove('show');
+document.querySelectorAll('.wizard-opt').forEach(b => b.classList.remove('selected'));
+['wdot0','wdot1','wdot2'].forEach((id, i) => {
+  const el = document.getElementById(id);
+  if (el) el.className = 'wizard-progress-dot' + (i === 0 ? ' active' : '');
+});
+document.getElementById('progressFill').style.width = '0%';
+document.getElementById('progressLabel').textContent = '整體完成度 0%';
+window.scrollTo({top:0});
 }
 </script>
 <div id="global-tooltip"></div>
