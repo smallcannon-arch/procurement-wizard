@@ -1178,6 +1178,187 @@ header {
 }
 .case-btn-save:hover { background: #1a5f3a; }
 
+/* ── 情境問答入口 ── */
+.wizard-screen {
+  max-width: 600px;
+  margin: 48px auto 0;
+  padding: 0 24px 80px;
+}
+.wizard-hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.wizard-hero h2 {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.wizard-hero p {
+  font-size: 0.88rem;
+  color: var(--ink-light);
+  line-height: 1.7;
+}
+.wizard-q {
+  margin-bottom: 28px;
+  animation: fadeUp 0.25s ease;
+}
+.wizard-q-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+.wizard-q-title {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.wizard-q-sub {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.wizard-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wizard-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  background: white;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.88rem;
+  color: var(--ink);
+  text-align: left;
+}
+.wizard-opt:hover {
+  border-color: var(--ink-mid);
+  transform: translateX(3px);
+}
+.wizard-opt.selected {
+  border-color: var(--accent);
+  background: #fff6f3;
+}
+.wizard-opt-icon { font-size: 1.2rem; flex-shrink: 0; }
+.wizard-opt-text { flex: 1; }
+.wizard-opt-label { font-weight: 600; margin-bottom: 2px; }
+.wizard-opt-desc { font-size: 0.75rem; color: var(--ink-light); }
+.wizard-opt.selected .wizard-opt-desc { color: var(--accent); }
+.wizard-amount-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.wizard-amount-input {
+  width: 200px;
+  padding: 11px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.95rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.wizard-amount-input:focus { border-color: var(--ink); }
+.wizard-amount-hint { font-size: 0.82rem; color: var(--ink-mid); font-weight: 500; }
+.wizard-amount-band {
+  display: none;
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.wizard-amount-band.small { background: #f0fdf4; color: #166534; display: block; }
+.wizard-amount-band.mid { background: #fffbeb; color: #92400e; display: block; }
+.wizard-amount-band.large { background: #eff6ff; color: #1e40af; display: block; }
+.wizard-result {
+  display: none;
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 12px;
+  animation: fadeUp 0.3s ease;
+}
+.wizard-result.show { display: block; }
+.wizard-result-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.wizard-result-method {
+  font-family: 'Noto Serif TC', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.wizard-result-desc {
+  font-size: 0.82rem;
+  color: var(--ink-light);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.wizard-result-btn {
+  width: 100%;
+  padding: 13px;
+  background: var(--ink);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  letter-spacing: 0.04em;
+}
+.wizard-result-btn:hover { background: var(--accent); }
+.wizard-result-btn.external { background: var(--info); }
+.wizard-result-btn.external:hover { background: #0e4166; }
+.wizard-skip {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.wizard-skip a {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.wizard-skip a:hover { color: var(--ink); }
+.wizard-progress { display: flex; gap: 6px; margin-bottom: 28px; }
+.wizard-progress-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.2s;
+}
+.wizard-progress-dot.active { background: var(--accent); }
+.wizard-progress-dot.done { background: var(--green); }
+
 @media(max-width:640px) {
   .option-grid.col3,.option-grid.col4 { grid-template-columns: repeat(2,1fr); }
   .option-grid.col2 { grid-template-columns: 1fr; }
