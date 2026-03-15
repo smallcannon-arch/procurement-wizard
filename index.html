@@ -1463,7 +1463,7 @@ header {
     <div class="wizard-q-sub">請填入含稅總金額。若有分批採購，請填入所有批次的合計總額。</div>
     <div class="wizard-amount-wrap">
       <input type="number" class="wizard-amount-input" id="wizardAmount"
-        placeholder="0" min="0" oninput="onWizardAmount()">
+  placeholder="0" min="0" oninput="onWizardAmountLive()" onkeydown="if(event.key==='Enter')onWizardAmount()">
       <span style="font-size:0.88rem;color:var(--ink-light)">元</span>
       <span class="wizard-amount-hint" id="wizardAmountHint"></span>
     </div>
@@ -1779,19 +1779,55 @@ function selectWizard(key, val, el) {
   }
 }
 
-function onWizardAmount() {
+function onWizardAmountLive() {
   wizardAmountValue = parseFloat(document.getElementById('wizardAmount').value) || 0;
   const hint = document.getElementById('wizardAmountHint');
   const band = document.getElementById('wizardAmountBand');
-  // 每次金額變更，重置後續問題與結果狀態
-  resultShown = false;
-  wq3Shown = false;
-  wq4aShown = false;
+  if (wizardAmountValue <= 0) {
+    hint.textContent = '';
+    band.className = 'wizard-amount-band';
+    band.textContent = '';
+    return;
+  }
+  hint.textContent = '（' + formatMoney(wizardAmountValue) + '）';
+  if (wizardAmountValue < 150000) {
+    band.className = 'wizard-amount-band small';
+    band.textContent = '✅ 未達 15 萬元（小額採購級距）';
+  } else if (wizardAmountValue < 1500000) {
+    band.className = 'wizard-amount-band mid';
+    band.textContent = '📋 15萬以上、未達 150 萬元';
+  } else {
+    band.className = 'wizard-amount-band large';
+    band.textContent = '📋 150 萬元以上（公告金額以上）';
+  }
+}
+
+function onWizardAmount() {
+  wizardAmountValue = parseFloat(document.getElementById('wizardAmount').value) || 0;
+  if (wizardAmountValue <= 0) return;
+  // 重置後續狀態
+  resultShown = false; wq3Shown = false; wq4aShown = false; wq4bShown = false;
+  wizardQuality = null; wizardSpecial = null; wizardAward = null;
   document.getElementById('wq3').style.display = 'none';
   document.getElementById('wq4a').style.display = 'none';
   document.getElementById('wq4b').style.display = 'none';
   document.getElementById('wizardResult').classList.remove('show');
-  wizardQuality = null; wizardSpecial = null; wizardAward = null;
+  // 依金額顯示對應問題
+  document.getElementById('wdot1').classList.remove('active');
+  document.getElementById('wdot1').classList.add('done');
+  document.getElementById('wdot2').classList.add('active');
+  if (wizardAmountValue < 150000) {
+    resultShown = true; setTimeout(() => evalWizard(), 300);
+  } else if (wizardAmountValue < 1500000) {
+    wq3Shown = true;
+    document.getElementById('wq3').style.display = 'block';
+    setTimeout(() => document.getElementById('wq3').scrollIntoView({behavior:'smooth',block:'center'}), 100);
+  } else {
+    wq4aShown = true;
+    document.getElementById('wq4a').style.display = 'block';
+    setTimeout(() => document.getElementById('wq4a').scrollIntoView({behavior:'smooth',block:'center'}), 100);
+  }
+}
 
   if (wizardAmountValue <= 0) {
     hint.textContent = '';
