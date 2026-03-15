@@ -1783,6 +1783,15 @@ function onWizardAmount() {
   wizardAmountValue = parseFloat(document.getElementById('wizardAmount').value) || 0;
   const hint = document.getElementById('wizardAmountHint');
   const band = document.getElementById('wizardAmountBand');
+  // 每次金額變更，重置後續問題與結果狀態
+  resultShown = false;
+  wq3Shown = false;
+  wq4aShown = false;
+  document.getElementById('wq3').style.display = 'none';
+  document.getElementById('wq4a').style.display = 'none';
+  document.getElementById('wq4b').style.display = 'none';
+  document.getElementById('wizardResult').classList.remove('show');
+  wizardQuality = null; wizardSpecial = null; wizardAward = null;
 
   if (wizardAmountValue <= 0) {
     hint.textContent = '';
