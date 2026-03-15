@@ -1522,7 +1522,35 @@ header {
     <div class="wizard-q-title">這次打算怎麼決定得標廠商？</div>
     <div class="wizard-opts">
       <button class="wizard-opt" onclick="selectWizard('award','lowest',this)">
+<span class="wizard-opt-icon">🏷</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">以最低價格決標</div>
+          <div class="wizard-opt-desc">符合規格的最低標廠商得標（公開招標）</div>
+        </div>
+      </button>
+      <button class="wizard-opt" onclick="selectWizard('award','best',this)">
+        <span class="wizard-opt-icon">⭐</span>
+        <div class="wizard-opt-text">
+          <div class="wizard-opt-label">比較企劃書品質決標</div>
+          <div class="wizard-opt-desc">需成立評選委員會，適用或準用最有利標</div>
+        </div>
+      </button>
+    </div>
+  </div>
 
+  <!-- 判斷結果 -->
+  <div class="wizard-result" id="wizardResult">
+    <div class="wizard-result-label">建議採購方式</div>
+    <div class="wizard-result-method" id="wizardResultMethod"></div>
+    <div class="wizard-result-desc" id="wizardResultDesc"></div>
+    <button class="wizard-result-btn" id="wizardResultBtn" onclick="wizardGo()"></button>
+  </div>
+
+  <!-- 跳過連結 -->
+  <div class="wizard-skip">
+    <a onclick="skipWizard()">我已知道採購方式　→ 直接選擇</a>
+  </div>
+</div>
   <!-- 步驟一：參數選擇 -->
   <div class="wizard-step" id="setupScreen" style="display:none">
     <div style="margin-bottom:16px;">
