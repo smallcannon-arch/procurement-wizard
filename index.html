@@ -2330,6 +2330,8 @@ document.addEventListener('keydown', e => {
 });
 
 function backToSetup() {
+  const fb = document.getElementById('floatSaveBtn');
+if (fb) fb.style.display = 'none';
   document.getElementById('flowScreen').style.display = 'none';
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('wizardScreen').style.display = 'block';
@@ -3123,6 +3125,8 @@ function startFlow() {
   currentCaseId = null;
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('flowScreen').style.display = 'block';
+  const fb = document.getElementById('floatSaveBtn');
+if (fb) fb.style.display = 'block';
   document.getElementById('caseSaveRow').style.display = 'none';
   // 預填案件名稱
   if (document.getElementById('caseNameInput')) {
@@ -3366,6 +3370,8 @@ function copyTemplate(id, btn) {
 }
 
 function showComplete() {
+  const fb = document.getElementById('floatSaveBtn');
+if (fb) fb.style.display = 'none';
   document.getElementById('flowScreen').style.display = 'none';
   document.getElementById('completeScreen').style.display = 'block';
   document.getElementById('progressFill').style.width = '100%';
@@ -3605,6 +3611,8 @@ async function loadCase(id) {
   document.getElementById('completeScreen').style.display = 'none';
   document.getElementById('setupScreen').style.display = 'none';
   document.getElementById('flowScreen').style.display = 'block';
+  const fb = document.getElementById('floatSaveBtn');
+if (fb) fb.style.display = 'block';
   document.getElementById('floatSaveBtn').style.display = 'block';
 
   if (document.getElementById('caseNameInput')) {
@@ -3648,7 +3656,26 @@ async function renderCasePanel() {
       </div>
     </div>`).join('');
 }
+function toggleCasePanel() {
+  const panel = document.getElementById('casePanel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) {
+    document.getElementById('casePanelBody').innerHTML = '<div class="case-empty">載入中...</div>';
+    renderCasePanel();
+  }
+  const inFlow = document.getElementById('flowScreen').style.display !== 'none';
+  document.getElementById('caseSaveRow').style.display = isOpen && inFlow ? 'block' : 'none';
+}
 
+function quickSave() {
+  const methodMap = {small:'小額採購',quote:'3家報價',spirit:'取最有利標精神',open:'公開招標',limited:'限制性招標'};
+  const defaultName = projectName
+    ? `${new Date().getFullYear()-1911}年${projectName}`
+    : `${new Date().getFullYear()-1911}年${methodMap[selectedMethod]||'採購案'}`;
+  const nameInput = document.getElementById('caseNameInput');
+  if (nameInput && !nameInput.value.trim()) nameInput.value = defaultName;
+  saveCase();
+}
 function resetAll() {
   selectedMethod = null; selectedType = null;
   projectName = ''; budgetAmount = 0; selectedAward = null;
@@ -3685,6 +3712,16 @@ document.getElementById('progressLabel').textContent = '整體完成度 0%';
 window.scrollTo({top:0});
 }
 </script>
+<button id="floatSaveBtn" onclick="quickSave()"
+  style="display:none; position:fixed; bottom:28px; right:72px; z-index:290;
+  background:var(--green); color:white; border:none; border-radius:50px;
+  padding:12px 22px; font-family:'Noto Sans TC',sans-serif; font-size:0.85rem;
+  font-weight:700; cursor:pointer; box-shadow:0 4px 16px rgba(45,122,79,0.35);
+  transition:all 0.2s; letter-spacing:0.03em;"
+  onmouseover="this.style.background='#1a5f3a'"
+  onmouseout="this.style.background='var(--green)'">
+  💾 儲存進度
+</button>
 <div id="global-tooltip"></div>
 </body>
 </html>
