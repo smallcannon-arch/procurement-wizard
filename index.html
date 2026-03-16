@@ -3585,15 +3585,21 @@ async function saveCase() {
     data: caseData
   });
 
-  if (res.success) {
-    casesCache = null;
-    currentCaseId = res.case_id;
-    const btn = document.querySelector('.case-btn-save');
-    if (btn) { btn.textContent = '✓ 已儲存'; setTimeout(() => btn.textContent = '💾 儲存目前進度', 2000); }
-    const floatBtn = document.getElementById('floatSaveBtn');
-    if (floatBtn) { floatBtn.textContent = '✓ 已儲存'; setTimeout(() => floatBtn.textContent = '💾 儲存進度', 2000); }
-    renderCasePanel();
+ if (res.success) {
+  currentCaseId = res.case_id;
+  // 直接更新快取，不重打 GAS
+  if (casesCache !== null) {
+    const existing = casesCache.findIndex(c => c.case_id === currentCaseId);
+    const newEntry = { case_id: currentCaseId, name, method: selectedMethod, saved_at: new Date().toISOString() };
+    if (existing >= 0) casesCache[existing] = newEntry;
+    else casesCache.push(newEntry);
   }
+  const btn = document.querySelector('.case-btn-save');
+  if (btn) { btn.textContent = '✓ 已儲存'; setTimeout(() => btn.textContent = '💾 儲存目前進度', 2000); }
+  const floatBtn = document.getElementById('floatSaveBtn');
+  if (floatBtn) { floatBtn.textContent = '✓ 已儲存'; setTimeout(() => floatBtn.textContent = '💾 儲存進度', 2000); }
+  renderCasePanel();
+}
 }
 
 async function loadCase(id) {
@@ -3632,7 +3638,10 @@ if (fb) fb.style.display = 'block';
 async function deleteCase(id) {
   if (!confirm('確定要刪除這筆案件紀錄嗎？')) return;
   await gasRequest({ action: 'delete', case_id: id });
-  casesCache = null;
+  // 直接從快取移除，不重打 GAS
+  if (casesCache !== null) {
+    casesCache = casesCache.filter(c => c.case_id !== id);
+  }
   if (currentCaseId === id) currentCaseId = null;
   renderCasePanel();
 }
