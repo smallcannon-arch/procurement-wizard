@@ -1369,9 +1369,31 @@ header {
   .case-panel { width: 100%; right: -100%; }
 }
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-
+<!-- ── Google 登入遮罩 ── -->
+<div id="loginScreen" style="display:flex; position:fixed; inset:0; background:var(--paper); z-index:9999; align-items:center; justify-content:center; flex-direction:column; gap:20px;">
+  <div style="text-align:center;">
+    <div style="font-size:3rem; margin-bottom:12px;">📋</div>
+    <h2 style="font-family:'Noto Serif TC',serif; font-size:1.5rem; color:var(--ink); margin-bottom:8px;">採購流程精靈</h2>
+    <p style="font-size:0.88rem; color:var(--ink-light); margin-bottom:28px;">請用學校 Google 帳號登入以儲存進度</p>
+    <div id="g_id_onload"
+      data-client_id="708047059390-2qhkln2rq34enarpa3ipucukm7bbl97m.apps.googleusercontent.com"
+      data-callback="handleGoogleLogin"
+      data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+      data-type="standard"
+      data-size="large"
+      data-theme="outline"
+      data-text="sign_in_with"
+      data-shape="rectangular"
+      data-logo_alignment="left">
+    </div>
+  </div>
+</div>
+  
 <!-- ── 系統資訊列 ── -->
 <div class="system-bar" id="systemBar">
   <span class="version-badge">v1.1</span>
@@ -1723,6 +1745,35 @@ header {
   </div>
 </div>
 
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXSckDnFFrjbr-IPdRmnJAcebfmg_gP1n5r2TLC3IEmNIrdGRBuaql4GAuDSnW8LP7dw/exec';
+let currentUser = null; // { email, name }
+
+function handleGoogleLogin(response) {
+  const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  currentUser = { email: payload.email, name: payload.name };
+  document.getElementById('loginScreen').style.display = 'none';
+  // 更新 header 顯示登入者
+  const bar = document.getElementById('systemBar');
+  const userTag = document.createElement('span');
+  userTag.style.cssText = 'margin-left:auto; font-size:0.78rem; opacity:0.85;';
+  userTag.textContent = '👤 ' + currentUser.name + '（' + currentUser.email + '）';
+  bar.appendChild(userTag);
+  // 載入案件清單
+  renderCasePanel();
+}
+
+async function gasRequest(params) {
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ ...params, email: currentUser?.email })
+    });
+    return await res.json();
+  } catch (e) {
+    console.error('GAS error:', e);
+    return { success: false, error: e.toString() };
+  }
+}
 <script>
 
 // ══════════════════════════════════════════
@@ -3476,25 +3527,86 @@ function initDeadlineCalc(phase) {
 const STORAGE_KEY = 'procurementCases_v1';
 let currentCaseId = null;
 
-function loadAllCases() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
-  catch { return []; }
-}
-function saveAllCases(cases) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cases));
+async function loadAllCases() {
+  if (!currentUser) return [];
+  const res = await gasRequest({ action: 'list' });
+  return res.success ? res.cases : [];
 }
 
-function toggleCasePanel() {
-  const panel = document.getElementById('casePanel');
-  const isOpen = panel.classList.toggle('open');
-  if (isOpen) renderCasePanel();
-  // 顯示/隱藏儲存列：只在流程進行中才顯示
-  const inFlow = document.getElementById('flowScreen').style.display !== 'none';
-  document.getElementById('caseSaveRow').style.display = isOpen && inFlow ? 'block' : 'none';
+async function saveCase() {
+  if (!currentUser) return;
+  const nameInput = document.getElementById('caseNameInput');
+  const name = nameInput.value.trim();
+  if (!name) { nameInput.focus(); return; }
+
+  const total = Object.keys(checked).length;
+  const done = Object.values(checked).filter(Boolean).length;
+
+  const caseData = {
+    method: selectedMethod, type: selectedType,
+    project: projectName, budget: budgetAmount,
+    phase: currentPhase, checked: { ...checked },
+    total, done
+  };
+
+  const caseId = currentCaseId || 'case_' + Date.now();
+  const res = await gasRequest({
+    action: 'save',
+    case_id: caseId,
+    name, method: selectedMethod,
+    data: caseData
+  });
+
+  if (res.success) {
+    currentCaseId = res.case_id;
+    const btn = document.querySelector('.case-btn-save');
+    if (btn) { btn.textContent = '✓ 已儲存'; setTimeout(() => btn.textContent = '💾 儲存目前進度', 2000); }
+    const floatBtn = document.getElementById('floatSaveBtn');
+    if (floatBtn) { floatBtn.textContent = '✓ 已儲存'; setTimeout(() => floatBtn.textContent = '💾 儲存進度', 2000); }
+    renderCasePanel();
+  }
 }
 
-function renderCasePanel() {
-  const cases = loadAllCases();
+async function loadCase(id) {
+  const res = await gasRequest({ action: 'load', case_id: id });
+  if (!res.success) return;
+  const c = res.data;
+
+  selectedMethod = c.method;
+  selectedType = c.type;
+  projectName = c.project || '';
+  budgetAmount = c.budget || 0;
+  if (document.getElementById('projectName')) document.getElementById('projectName').value = projectName;
+  if (document.getElementById('budgetAmount')) document.getElementById('budgetAmount').value = budgetAmount || '';
+  currentPhase = c.phase || 0;
+  checked = { ...c.checked };
+  currentCaseId = id;
+
+  document.getElementById('casePanel').classList.remove('open');
+  document.getElementById('completeScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('flowScreen').style.display = 'block';
+  document.getElementById('floatSaveBtn').style.display = 'block';
+
+  if (document.getElementById('caseNameInput')) {
+    document.getElementById('caseNameInput').value = id;
+  }
+
+  const phases = getPhases();
+  renderFlow(phases);
+  updateProgress(phases);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function deleteCase(id) {
+  if (!confirm('確定要刪除這筆案件紀錄嗎？')) return;
+  await gasRequest({ action: 'delete', case_id: id });
+  if (currentCaseId === id) currentCaseId = null;
+  renderCasePanel();
+}
+
+async function renderCasePanel() {
+  const cases = await loadAllCases();
   const badge = document.getElementById('caseBadge');
   if (badge) badge.textContent = cases.length;
 
@@ -3503,108 +3615,20 @@ function renderCasePanel() {
     body.innerHTML = '<div class="case-empty">尚無儲存的案件<br>開始流程後點擊「儲存進度」即可保存</div>';
     return;
   }
-  body.innerHTML = cases.map(c => {
-    const pct = c.total ? Math.round(c.done/c.total*100) : 0;
-    const pctCls = pct < 30 ? 'low' : pct < 70 ? 'mid' : 'high';
-    const methodMap = {small:'小額採購',quote:'3家報價',spirit:'取最有利標精神',open:'公開招標',limited:'限制性招標'};
-    const typeMap = {goods:'財物',service:'勞務',work:'工程'};
-    return `<div class="case-card">
+  const methodMap = { small:'小額採購', quote:'3家報價', spirit:'取最有利標精神', open:'公開招標', limited:'限制性招標' };
+  body.innerHTML = cases.map(c => `
+    <div class="case-card">
       <div class="case-card-title">${c.name}</div>
       <div class="case-card-meta">
-        <span>${methodMap[c.method]||c.method}</span>
-        <span>${typeMap[c.type]||c.type}</span>
-        <span>${c.school||''}</span>
-        <span>${new Date(c.savedAt).toLocaleDateString('zh-TW')}</span>
+        <span>${methodMap[c.method] || c.method}</span>
+        <span>${new Date(c.saved_at).toLocaleDateString('zh-TW')}</span>
       </div>
-      <div class="case-card-pct ${pctCls}">${pct}% 完成</div>
       <div class="case-card-actions">
-        <button class="case-btn case-btn-load" onclick="loadCase('${c.id}')">📂 載入繼續</button>
-        <button class="case-btn case-btn-del" onclick="deleteCase('${c.id}')">🗑 刪除</button>
+        <button class="case-btn case-btn-load" onclick="loadCase('${c.case_id}')">📂 載入繼續</button>
+        <button class="case-btn case-btn-del" onclick="deleteCase('${c.case_id}')">🗑 刪除</button>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
-
-function saveCase() {
-  const nameInput = document.getElementById('caseNameInput');
-  const name = nameInput.value.trim();
-  if (!name) { nameInput.focus(); return; }
-
-  const total = Object.keys(checked).length;
-  const done = Object.values(checked).filter(Boolean).length;
-
-  const cases = loadAllCases();
-  const id = currentCaseId || `case_${Date.now()}`;
-  const existing = cases.findIndex(c => c.id === id);
-
-  const caseData = {
-    id, name,
-    method: selectedMethod, type: selectedType, school: schoolName, project: projectName, budget: budgetAmount,
-    phase: currentPhase, checked: {...checked},
-    total, done, savedAt: new Date().toISOString()
-  };
-
-  if (existing >= 0) cases[existing] = caseData;
-  else cases.unshift(caseData);
-
-  saveAllCases(cases);
-  currentCaseId = id;
-  renderCasePanel();
-
-  // 視覺回饋
-  const btn = document.querySelector('.case-btn-save');
-  if (btn) { btn.textContent = '✓ 已儲存'; setTimeout(()=>btn.textContent='💾 儲存目前進度',2000); }
-  const badge = document.getElementById('caseBadge');
-  if (badge) badge.textContent = cases.length;
-}
-
-function loadCase(id) {
-  const cases = loadAllCases();
-  const c = cases.find(x=>x.id===id);
-  if (!c) return;
-
-  selectedMethod = c.method;
-  selectedType = c.type;
-  schoolName = c.school || '';
-  projectName = c.project || '';
-  budgetAmount = c.budget || 0;
-  if (document.getElementById('projectName')) document.getElementById('projectName').value = projectName;
-  if (document.getElementById('budgetAmount')) document.getElementById('budgetAmount').value = budgetAmount || '';
-  currentPhase = c.phase || 0;
-  checked = {...c.checked};
-  currentCaseId = id;
-
-  document.getElementById('casePanel').classList.remove('open');
-  document.getElementById('completeScreen').style.display = 'none';
-  document.getElementById('setupScreen').style.display = 'none';
-  document.getElementById('flowScreen').style.display = 'block';
-
-  if (document.getElementById('caseNameInput')) {
-    document.getElementById('caseNameInput').value = c.name;
-  }
-
-  const phases = getPhases();
-  renderFlow(phases);
-  updateProgress(phases);
-  window.scrollTo({top:0, behavior:'smooth'});
-}
-
-function deleteCase(id) {
-  if (!confirm('確定要刪除這筆案件紀錄嗎？')) return;
-  const cases = loadAllCases().filter(c=>c.id!==id);
-  saveAllCases(cases);
-  if (currentCaseId === id) currentCaseId = null;
-  renderCasePanel();
-  const badge = document.getElementById('caseBadge');
-  if (badge) badge.textContent = cases.length;
-}
-
-// 初始化時更新 badge
-window.addEventListener('DOMContentLoaded', () => {
-  const cases = loadAllCases();
-  const badge = document.getElementById('caseBadge');
-  if (badge) badge.textContent = cases.length;
-});
 
 function resetAll() {
   selectedMethod = null; selectedType = null;
