@@ -1742,6 +1742,8 @@ header {
   </div>
 </div>
 
+<script>
+
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXSckDnFFrjbr-IPdRmnJAcebfmg_gP1n5r2TLC3IEmNIrdGRBuaql4GAuDSnW8LP7dw/exec';
 let currentUser = null; // { email, name }
 
@@ -1792,8 +1794,7 @@ async function gasRequest(params) {
     return { success: false, error: e.toString() };
   }
 }
-<script>
-
+  
 // ══════════════════════════════════════════
 // 情境問答入口
 // ══════════════════════════════════════════
