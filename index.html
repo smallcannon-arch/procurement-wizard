@@ -3549,13 +3549,16 @@ function initDeadlineCalc(phase) {
 }
 
 // ── 案件管理 (localStorage) ──
+let casesCache = null;
 const STORAGE_KEY = 'procurementCases_v1';
 let currentCaseId = null;
 
 async function loadAllCases() {
   if (!currentUser) return [];
+  if (casesCache) return casesCache;
   const res = await gasRequest({ action: 'list' });
-  return res.success ? res.cases : [];
+  casesCache = res.success ? res.cases : [];
+  return casesCache;
 }
 
 async function saveCase() {
@@ -3583,6 +3586,7 @@ async function saveCase() {
   });
 
   if (res.success) {
+    casesCache = null;
     currentCaseId = res.case_id;
     const btn = document.querySelector('.case-btn-save');
     if (btn) { btn.textContent = '✓ 已儲存'; setTimeout(() => btn.textContent = '💾 儲存目前進度', 2000); }
@@ -3628,6 +3632,7 @@ if (fb) fb.style.display = 'block';
 async function deleteCase(id) {
   if (!confirm('確定要刪除這筆案件紀錄嗎？')) return;
   await gasRequest({ action: 'delete', case_id: id });
+  casesCache = null;
   if (currentCaseId === id) currentCaseId = null;
   renderCasePanel();
 }
