@@ -1745,6 +1745,27 @@ header {
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXSckDnFFrjbr-IPdRmnJAcebfmg_gP1n5r2TLC3IEmNIrdGRBuaql4GAuDSnW8LP7dw/exec';
 let currentUser = null; // { email, name }
 
+function googleLogin() {
+  google.accounts.oauth2.initTokenClient({
+    client_id: '708047059390-2qhkln2rq34enarpa3ipucukm7bbl97m.apps.googleusercontent.com',
+    scope: 'email profile',
+    callback: async (tokenResponse) => {
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+      });
+      const info = await res.json();
+      currentUser = { email: info.email, name: info.name };
+      document.getElementById('loginScreen').style.display = 'none';
+      const bar = document.getElementById('systemBar');
+      const userTag = document.createElement('span');
+      userTag.style.cssText = 'margin-left:auto; font-size:0.78rem; opacity:0.85;';
+      userTag.textContent = '👤 ' + currentUser.name + '（' + currentUser.email + '）';
+      bar.appendChild(userTag);
+      renderCasePanel();
+    }
+  }).requestAccessToken();
+}
+  
 function handleGoogleLogin(response) {
   const payload = JSON.parse(atob(response.credential.split('.')[1]));
   currentUser = { email: payload.email, name: payload.name };
