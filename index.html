@@ -3153,7 +3153,7 @@ function renderFlow(phases) {
   nav.innerHTML = phases.map((p, i) => {
     const total = p.groups.reduce((s,g)=>s+g.items.length,0);
     const done = p.groups.reduce((s,g)=>s+g.items.filter((_,j)=>checked[`${p.id}-${g.label}-${j}`]).length,0);
-    const isDone = done === total;
+    const isDone = total > 0 && done === total;
     const isActive = i === currentPhase;
     return `<button class="phase-tab ${isDone?'done':isActive?'active':''}" onclick="goPhase(${i},${JSON.stringify(phases).replace(/"/g,'&quot;')})">
       <span class="tab-dot"></span>${i+1}. ${p.title}
