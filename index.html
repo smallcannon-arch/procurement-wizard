@@ -1762,7 +1762,7 @@ function googleLogin() {
         headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
       });
       const info = await res.json();
-      currentUser = { email: info.email, name: info.name };
+      currentUser = { email: info.email, name: info.name, token: tokenResponse.access_token };
       document.getElementById('loginScreen').style.display = 'none';
       const bar = document.getElementById('systemBar');
       const userTag = document.createElement('span');
@@ -1792,11 +1792,15 @@ async function gasRequest(params) {
   try {
     const res = await fetch(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify({ ...params, email: currentUser?.email })
+      body: JSON.stringify({ ...params, email: currentUser?.email, token: currentUser?.token })
     });
-    return await res.json();
+    const data = await res.json();
+    if (data.error === 'Token 驗證失敗') {
+      alert('登入已過期，請重新整理頁面並重新登入。');
+      return { success: false };
+    }
+    return data;
   } catch (e) {
-    console.error('GAS error:', e);
     return { success: false, error: e.toString() };
   }
 }
