@@ -1758,6 +1758,18 @@ let currentUser = null; // { email, name }
 
 function handleGoogleLogin(response) {
   // response.credential 就是 id_token (JWT)
+
+  // 1. 取得 JWT 的中間段 (payload)
+  const base64Url = response.credential.split('.')[1];
+  
+  // 2. 將 Base64Url 格式轉為標準 Base64 格式
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  
+  // 3. 進行解碼，並處理 UTF-8 字元（避免中文姓名亂碼）
+  const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+  
   const payload = JSON.parse(atob(response.credential.split('.')[1]));
   currentUser = { 
     email: payload.email, 
