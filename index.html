@@ -1754,37 +1754,29 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXSckDnFFrjbr-IPdRmnJA
 let currentUser = null; // { email, name }
 
 function googleLogin() {
-  google.accounts.oauth2.initTokenClient({
+  google.accounts.id.initialize({
     client_id: '708047059390-2qhkln2rq34enarpa3ipucukm7bbl97m.apps.googleusercontent.com',
-    scope: 'email profile',
-    callback: async (tokenResponse) => {
-      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
-      });
-      const info = await res.json();
-      currentUser = { email: info.email, name: info.name, token: tokenResponse.access_token };
-      document.getElementById('loginScreen').style.display = 'none';
-      const bar = document.getElementById('systemBar');
-      const userTag = document.createElement('span');
-      userTag.style.cssText = 'margin-left:auto; font-size:0.78rem; opacity:0.85;';
-      userTag.textContent = '👤 ' + currentUser.name + '（' + currentUser.email + '）';
-      bar.appendChild(userTag);
-      renderCasePanel();
-    }
-  }).requestAccessToken();
+    callback: handleGoogleLogin
+  });
+  google.accounts.id.prompt();
 }
-  
+
 function handleGoogleLogin(response) {
+  // response.credential 就是 id_token (JWT)
   const payload = JSON.parse(atob(response.credential.split('.')[1]));
-  currentUser = { email: payload.email, name: payload.name };
+  currentUser = { 
+    email: payload.email, 
+    name: payload.name, 
+    token: response.credential
+  };
   document.getElementById('loginScreen').style.display = 'none';
-  // 更新 header 顯示登入者
+  
   const bar = document.getElementById('systemBar');
   const userTag = document.createElement('span');
   userTag.style.cssText = 'margin-left:auto; font-size:0.78rem; opacity:0.85;';
   userTag.textContent = '👤 ' + currentUser.name + '（' + currentUser.email + '）';
   bar.appendChild(userTag);
-  // 載入案件清單
+  
   renderCasePanel();
 }
 
