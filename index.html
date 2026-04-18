@@ -3675,31 +3675,38 @@ async function loadCase(id) {
   if (!res.success) return;
   const c = res.data;
 
+  // 1. 設定進度數據
   selectedMethod = c.method;
   selectedType = c.type;
   projectName = c.project || '';
   budgetAmount = c.budget || 0;
+  
   if (document.getElementById('projectName')) document.getElementById('projectName').value = projectName;
   if (document.getElementById('budgetAmount')) document.getElementById('budgetAmount').value = budgetAmount || '';
+  
   currentPhase = c.phase || 0;
   checked = { ...c.checked };
   currentCaseId = id;
 
+  // 2. 介面切換 (關鍵在這裡！)
   document.getElementById('casePanel').classList.remove('open');
   document.getElementById('completeScreen').style.display = 'none';
   document.getElementById('setupScreen').style.display = 'none';
+  
+  // 【新增這行】確保讀取進度時，初始問答畫面被隱藏
+  document.getElementById('wizardScreen').style.display = 'none'; 
+  
   document.getElementById('flowScreen').style.display = 'block';
+  
+  // 顯示右下角浮動儲存按鈕
   const fb = document.getElementById('floatSaveBtn');
-if (fb) fb.style.display = 'block';
-  document.getElementById('floatSaveBtn').style.display = 'block';
+  if (fb) fb.style.display = 'block';
 
-  if (document.getElementById('caseNameInput')) {
-    document.getElementById('caseNameInput').value = id;
-  }
-
+  // 3. 重新渲染流程圖表
   const phases = getPhases();
   renderFlow(phases);
   updateProgress(phases);
+  
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
