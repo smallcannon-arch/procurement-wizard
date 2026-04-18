@@ -1378,16 +1378,19 @@ header {
     <div style="font-size:3rem; margin-bottom:12px;">📋</div>
     <h2 style="font-family:'Noto Serif TC',serif; font-size:1.5rem; color:var(--ink); margin-bottom:8px;">採購流程精靈</h2>
     <p style="font-size:0.88rem; color:var(--ink-light); margin-bottom:28px;">請用學校 Google 帳號登入以儲存進度</p>
-<button onclick="googleLogin()"
-  style="display:flex; align-items:center; gap:10px; padding:12px 24px;
-  background:white; border:2px solid #dadce0; border-radius:8px;
-  font-family:'Noto Sans TC',sans-serif; font-size:0.95rem; font-weight:600;
-  color:#3c4043; cursor:pointer; transition:all 0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.1);"
-  onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.15)'"
-  onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)'">
-  <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20">
-  使用 Google 帳號登入
-</button>
+<div id="g_id_onload"
+     data-client_id="708047059390-2qhkln2rq34enarpa3ipucukm7bbl97m.apps.googleusercontent.com"
+     data-callback="handleGoogleLogin"
+     data-auto_prompt="false">
+</div>
+<div class="g_id_signin"
+     data-type="standard"
+     data-size="large"
+     data-theme="outline"
+     data-text="sign_in_with"
+     data-shape="rectangular"
+     data-logo_alignment="left">
+</div>
   </div>
   <div style="font-size:0.72rem;color:var(--ink-light);text-align:center;line-height:2;margin-top:8px;">
     © 2026 內湖國小總務處　開發者：江志宏<br>
@@ -1752,14 +1755,6 @@ header {
 
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXSckDnFFrjbr-IPdRmnJAcebfmg_gP1n5r2TLC3IEmNIrdGRBuaql4GAuDSnW8LP7dw/exec';
 let currentUser = null; // { email, name }
-
-function googleLogin() {
-  google.accounts.id.initialize({
-    client_id: '708047059390-2qhkln2rq34enarpa3ipucukm7bbl97m.apps.googleusercontent.com',
-    callback: handleGoogleLogin
-  });
-  google.accounts.id.prompt();
-}
 
 function handleGoogleLogin(response) {
   // response.credential 就是 id_token (JWT)
