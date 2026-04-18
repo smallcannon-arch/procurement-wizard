@@ -26,6 +26,11 @@
   --shadow: rgba(28,28,46,0.10);
 }
 
+#user-info-tag button:hover {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Noto Sans TC', sans-serif;
@@ -1787,12 +1792,24 @@ function handleGoogleLogin(response) {
       token: credential
     };
 
-    // 介面處理：隱藏登入遮罩，更新系統列
+    // 介面處理：隱藏登入遮罩
     document.getElementById('loginScreen').style.display = 'none';
+    
+    // ══ 新增：顯示使用者資訊與登出按鈕 ══
     const bar = document.getElementById('systemBar');
+    const existingUserTag = document.getElementById('user-info-tag');
+    if (existingUserTag) existingUserTag.remove(); // 避免重複產生
+
     const userTag = document.createElement('span');
-    userTag.style.cssText = 'margin-left:auto; font-size:0.78rem; opacity:0.85;';
-    userTag.textContent = '👤 ' + currentUser.name + '（' + currentUser.email + '）';
+    userTag.id = 'user-info-tag';
+    userTag.style.cssText = 'margin-left:auto; font-size:0.78rem; opacity:0.85; display:flex; align-items:center; gap:12px;';
+    
+    userTag.innerHTML = `
+      <span>👤 ${currentUser.name} (${currentUser.email})</span>
+      <button onclick="logout()" style="background:rgba(255,255,255,0.15); color:white; border:1px solid rgba(255,255,255,0.3); padding:2px 8px; border-radius:4px; cursor:pointer; font-size:0.7rem; transition:all 0.2s;">
+        登出帳號
+      </button>
+    `;
     bar.appendChild(userTag);
     
     // 載入進度
@@ -1804,6 +1821,31 @@ function handleGoogleLogin(response) {
   }
 }
 
+function logout() {
+  if (!confirm('確定要登出並回到登入畫面嗎？')) return;
+
+  // 1. 清空變數
+  currentUser = null;
+  currentCaseId = null;
+  casesCache = null;
+
+  // 2. 切換 UI
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('flowScreen').style.display = 'none';
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('wizardScreen').style.display = 'block';
+  document.getElementById('floatSaveBtn').style.display = 'none';
+
+  // 3. 移除資訊列
+  const userTag = document.getElementById('user-info-tag');
+  if (userTag) userTag.remove();
+
+  // 4. 重置 Google 登入狀態
+  google.accounts.id.disableAutoSelect();
+  
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+  
 async function gasRequest(params) {
   try {
     const res = await fetch(GAS_URL, {
